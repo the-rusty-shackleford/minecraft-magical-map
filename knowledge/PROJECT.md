@@ -1,8 +1,8 @@
 # Magical Map
 
 Minecraft 1.21.1 / NeoForge 21.1.248 / Java 21. New mod, `magicalmap`, in
-`minecraft-magical-map`. Version 0.1.0 is implemented and locally verified;
-publication, pack updates and deployment remain unauthorized.
+`minecraft-magical-map`. Version 0.1.0 is the first release. Rusty approved the
+interactive test and authorized release on 2026-09-20.
 
 Rusty selected an atlas built from real vanilla map sheets, revealed through
 exploration with a meaningful cartography-table workflow. See
@@ -16,27 +16,29 @@ travel view, player heads, village actions and landmark editor were inspected.
 See [verification evidence](../devtools/verification/0.1.0.md) for the scope,
 screenshots, commands and limits.
 
-Review checkpoint: local implementation and automated gates are complete. Rusty's
-hands-on assessment of the navigation and visual design is still outstanding.
-There is no live-server or assembled-pack verification and no release authorization.
+The clean release build passed six JUnit tests, twelve real-server GameTests and
+the full muted shader-client walkthrough on hardware OpenGL. The production jar
+is byte-identical to the reviewed candidate. See
+[release verification](../devtools/verification/release-0.1.0.md).
 The optional integration bridges use validated reflection until their source mods
 provide a published API. The public provider protocol is documented in
 [location-providers.md](../docs/location-providers.md).
 
 The hands-on course is launched with `bash devtools/playtest.sh`. It has a separate,
-disposable world, a field guide, real integration fixtures and a moving simulated
+retained world, a field guide, real integration fixtures and a moving simulated
 second player. See the README for the route and controls. It is separate from the
 automated booth and is never a prerequisite that blocks unattended `check` runs.
 On 2026-09-20 its Java compilation and launcher shell checks passed. The actual
 shader client reached `atlas playtest: READY` with two sheets, two player markers,
 an active camp, village teleport and the field guide; the simulated player's
 connection remained active beyond 40 seconds. The starting travel view was
-visually inspected. User interaction and feedback remain pending.
+visually inspected. Rusty subsequently approved the hands-on result.
 
 Rusty's first interactive test reported severe stutter: its launcher had inherited
 the automated booth's software-rendering overrides. The interactive launcher now
 uses the desktop GPU, rejects software OpenGL, and defaults to a 120 FPS cap.
-`--resume` retains the existing practice world and player state. The corrected
+Resuming is now the default; `--reset` explicitly rebuilds the practice course.
+Rusty asked to retain this configured instance for future testing. The corrected
 launch resumed the saved course with the hardware renderer and logged 60 FPS
 with the same shader pack. Compilation and shell checks passed. This corrects
 the original playtest's rendering environment; it is not a live-server release.

@@ -300,10 +300,10 @@ public final class AtlasPlaytest {
                                 + "Spare supplies are in your inventory. Duplicate map IDs are"
                                 + " refused.",
                         "6. WRAP UP\n\n"
-                                + "Try a copied or locked sheet and toggle N. Move the atlas out of"
-                                + " both hands: the travel view disappears.\n\n"
-                                + "Lost? /tp @s 4 64 -8\n\n"
-                                + "Quit when done. Relaunching resets this practice world.");
+                            + "Try a copied or locked sheet and toggle N. Move the atlas out of"
+                            + " both hands: the travel view disappears.\n\n"
+                            + "Lost? /tp @s 4 64 -8\n\n"
+                            + "Quit when done. Relaunch to resume; --reset starts a fresh course.");
         var book = new ItemStack(Items.WRITTEN_BOOK);
         book.set(
                 DataComponents.WRITTEN_BOOK_CONTENT,

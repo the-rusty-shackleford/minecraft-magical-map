@@ -9,8 +9,10 @@ esac
 playtest_args=()
 if [[ "${2:-}" == '--resume' && "$interactive" == true && $# == 2 ]]; then
     playtest_args+=('-PplaytestResume')
+elif [[ "${2:-}" == '--reset' && "$interactive" == true && $# == 2 ]]; then
+    playtest_args+=('-PplaytestReset')
 elif [[ $# -gt 1 ]]; then
-    echo 'Usage: booth.sh [--interactive [--resume]]'; exit 2
+    echo 'Usage: booth.sh [--interactive [--resume|--reset]]'; exit 2
 fi
 mkdir -p run
 # Run with host process visibility. Inspect before launch; never open a second rendering client.

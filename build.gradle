@@ -32,8 +32,9 @@ def boothWorld = tasks.register('prepareBoothWorld', Sync) {
         file('run/booth/options.txt').text = 'onboardAccessibility:false\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nrenderDistance:8\nsimulationDistance:5\nmaxFps:30\nguiScale:2\ntutorialStep:none\n'
     }
 }
+def resumePlaytest = file('run/playtest/saves/atlas-playtest/level.dat').isFile() && !project.hasProperty('playtestReset')
 def playtestWorld = tasks.register('preparePlaytestWorld', Sync) {
-    onlyIf { !project.hasProperty('playtestResume') }
+    onlyIf { !resumePlaytest && !project.hasProperty('playtestResume') }
     outputs.upToDateWhen { false }
     doFirst {
         if (!file('run/world/level.dat').isFile()) {
@@ -83,7 +84,7 @@ neoForge {
             sourceSet = sourceSets.gametest
             gameDirectory = file('run/playtest')
             systemProperty 'magicalmap.playtest', 'true'
-            systemProperty 'magicalmap.playtest.resume', project.hasProperty('playtestResume').toString()
+            systemProperty 'magicalmap.playtest.resume', resumePlaytest.toString()
             programArguments.addAll('--quickPlaySingleplayer', 'atlas-playtest', '--width', '1280', '--height', '720')
             taskBefore playtestWorld
         }

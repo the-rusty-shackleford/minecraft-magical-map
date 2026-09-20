@@ -4,7 +4,7 @@ A physical atlas for Minecraft 1.21.1 and NeoForge 21.1.248. Join real vanilla m
 chart the world through exploration, and navigate with player heads, owned villages,
 your deployed C.A.M.P. and private landmarks.
 
-**0.1.0 — local development; not published or deployed.** Install matching versions
+**0.1.0.** Install matching versions
 on client and server. Village Deed and C.A.M.P. integrations are optional.
 
 ![The atlas with two player heads, village, camp and landmark markers](devtools/verification/0.1.0/atlas.png)
@@ -125,9 +125,11 @@ all controls with you and stays open until you quit. It opens a normal desktop
 window using the native GPU driver, clears software-rendering overrides, and
 refuses a software OpenGL renderer. The interactive FPS cap is 120.
 
-By default, each launch resets only `run/playtest/saves/atlas-playtest`, so practice
-changes are disposable. Use `bash devtools/playtest.sh --resume` to retain your
-current practice world, inventory, explored terrain and landmarks. It requires
+The configured instance at `run/playtest/` is retained for future testing.
+Launching again resumes your world, inventory, explored terrain and landmarks.
+Only `bash devtools/playtest.sh --reset` rebuilds the practice course. The equivalent
+Gradle option is `-PplaytestReset`; `--resume` remains an explicit resume shortcut.
+The first launch requires
 the three integration jars below and a template at
 `run/world/level.dat` (create it with `./gradlew runGameTestServer`). Shader/runtime
 files are copied from the booth setup below on a fresh launch. The launcher checks

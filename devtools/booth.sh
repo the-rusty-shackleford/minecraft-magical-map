@@ -6,6 +6,12 @@ case "${1:-}" in
     --interactive) interactive=true ;;
     *) echo 'Usage: booth.sh [--interactive]'; exit 2 ;;
 esac
+playtest_args=()
+if [[ "${2:-}" == '--resume' && "$interactive" == true && $# == 2 ]]; then
+    playtest_args+=('-PplaytestResume')
+elif [[ $# -gt 1 ]]; then
+    echo 'Usage: booth.sh [--interactive [--resume]]'; exit 2
+fi
 mkdir -p run
 # Run with host process visibility. Inspect before launch; never open a second rendering client.
 uv run --no-project --python 3.14 python - <<'PY'
@@ -22,6 +28,16 @@ for p in Path('/proc').iterdir():
     except (OSError, PermissionError):
         pass
 PY
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+if "$interactive"; then
+    : "${DISPLAY:?Launch the interactive playtest from your desktop session}"
+    # Interactive shaders need the desktop display and its native GPU driver.
+    unset LIBGL_ALWAYS_SOFTWARE LIBGL_ALWAYS_INDIRECT GALLIUM_DRIVER
+    unset MESA_GL_VERSION_OVERRIDE MESA_GLSL_VERSION_OVERRIDE MESA_LOADER_DRIVER_OVERRIDE
+    unset __GLX_VENDOR_LIBRARY_NAME
+    ./gradlew runPlaytest --offline "${playtest_args[@]}"
+    exit
+fi
 existing="$(pgrep -a Xephyr || true)"
 owned_pid=''
 cleanup() {
@@ -42,11 +58,6 @@ else
     sleep 1
 fi
 export DISPLAY="$display"
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export __GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
 export MESA_GL_VERSION_OVERRIDE=4.6 MESA_GLSL_VERSION_OVERRIDE=460
-if "$interactive"; then
-    ./gradlew runPlaytest --offline
-else
-    timeout --kill-after=10s 300s ./gradlew runPhotoBooth --offline
-fi
+timeout --kill-after=10s 300s ./gradlew runPhotoBooth --offline

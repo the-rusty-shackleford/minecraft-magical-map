@@ -477,12 +477,20 @@ public final class AtlasBooth {
                                 Optional.of(p.getUUID()),
                                 false,
                                 ""));
+        peer = createPeer(p);
+        ready = true;
+        return peer;
+    }
+
+    /** Creates only the simulated player, retaining the existing course and human inventory. */
+    static ServerPlayer createPeer(ServerPlayer p) {
+        var level = p.serverLevel();
         var profile =
                 new com.mojang.authlib.GameProfile(
                         UUID.fromString("b889ea1d-09a3-4a16-8174-114a64068e02"), "Surveyor");
         var cookie =
                 net.minecraft.server.network.CommonListenerCookie.createInitial(profile, false);
-        peer = new ServerPlayer(p.server, level, profile, cookie.clientInformation());
+        var peer = new ServerPlayer(p.server, level, profile, cookie.clientInformation());
         var connection =
                 new net.minecraft.network.Connection(
                         net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
@@ -491,7 +499,6 @@ public final class AtlasBooth {
         peer.setGameMode(GameType.CREATIVE);
         peer.setNoGravity(true);
         peer.moveTo(-5.5, 64, -20.5, 90, 0);
-        ready = true;
         return peer;
     }
 

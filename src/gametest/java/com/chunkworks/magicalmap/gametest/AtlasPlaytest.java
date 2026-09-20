@@ -4,6 +4,7 @@ package com.chunkworks.magicalmap.gametest;
 import com.chunkworks.magicalmap.*;
 import com.chunkworks.magicalmap.api.Location;
 import com.chunkworks.magicalmap.client.AtlasClient;
+import com.mojang.blaze3d.platform.GlUtil;
 
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.ReferenceCountUtil;
@@ -51,17 +52,31 @@ public final class AtlasPlaytest {
     private static volatile Throwable failure;
     private static ServerPlayer peer;
     private static int peerTicks;
+    private static int observedTicks;
 
     /** requires: client tick; effects: initializes and verifies the course once; throws: none. */
     @SubscribeEvent
     public static void clientTick(ClientTickEvent.Post event) {
-        if (!Boolean.getBoolean("magicalmap.playtest") || handedOver) return;
+        if (!Boolean.getBoolean("magicalmap.playtest")) return;
         var mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || mc.getSingleplayerServer() == null) return;
+        if (handedOver) {
+            if (++observedTicks == 400)
+                LOG.info(
+                        "atlas playtest: renderer {} at {} FPS", GlUtil.getRenderer(), mc.getFps());
+            return;
+        }
         try {
             if (failure != null) throw new IllegalStateException("Course setup failed", failure);
             if (++age > 2400) throw new IllegalStateException("Course setup timed out");
             if (!scheduled && age > 20) {
+                String renderer = GlUtil.getRenderer().toLowerCase(java.util.Locale.ROOT);
+                if (renderer.contains("llvmpipe")
+                        || renderer.contains("softpipe")
+                        || renderer.contains("software"))
+                    throw new IllegalStateException(
+                            "Interactive playtest requires GPU rendering; detected "
+                                    + GlUtil.getRenderer());
                 scheduled = true;
                 var server = mc.getSingleplayerServer();
                 var id = mc.player.getUUID();
@@ -75,7 +90,21 @@ public final class AtlasPlaytest {
                             }
                         });
             }
-            if (!prepared || AtlasClient.loadedSheetCount() != 2 || age < 220) return;
+            if (!prepared) return;
+            if (Boolean.getBoolean("magicalmap.playtest.resume")) {
+                if (age < 60) return;
+                handedOver = true;
+                LOG.info(
+                        "atlas playtest: READY - resumed saved course using {}",
+                        GlUtil.getRenderer());
+                mc.gui
+                        .getChat()
+                        .addMessage(
+                                Component.literal(
+                                        "Practice world resumed. M: atlas | N: travel map."));
+                return;
+            }
+            if (AtlasClient.loadedSheetCount() != 2 || age < 220) return;
             if (AtlasClient.locations().stream()
                             .filter(p -> p.kind().equals("magicalmap:player"))
                             .count()
@@ -99,8 +128,8 @@ public final class AtlasPlaytest {
                     .addMessage(
                             Component.literal(
                                     "Walk east across the bridge to reveal blank terrain. Surveyor"
-                                        + " is a moving test companion. Quit whenever you are"
-                                        + " finished."));
+                                            + " is a moving test companion. Quit whenever you are"
+                                            + " finished."));
             Screenshot.grab(
                     mc.gameDirectory,
                     "playtest-ready.png",
@@ -109,7 +138,7 @@ public final class AtlasPlaytest {
             handedOver = true;
             LOG.info(
                     "atlas playtest: READY - two sheets, two heads, active camp, village and field"
-                        + " guide; controls handed to player");
+                            + " guide; controls handed to player");
         } catch (Throwable error) {
             LOG.error("atlas playtest: FAIL", error);
             handedOver = true;
@@ -145,6 +174,10 @@ public final class AtlasPlaytest {
     }
 
     private static void prepare(ServerPlayer player) {
+        if (Boolean.getBoolean("magicalmap.playtest.resume")) {
+            peer = AtlasBooth.createPeer(player);
+            return;
+        }
         peer = AtlasBooth.prepare(player);
         var level = player.serverLevel();
         level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, player.server);
@@ -236,11 +269,11 @@ public final class AtlasPlaytest {
         List<String> pages =
                 List.of(
                         "MAGICAL ATLAS\n\n"
-                            + "Your atlas is in your offhand.\n\n"
-                            + "M: open atlas\n"
-                            + "N: toggle travel map\n"
-                            + "WASD + mouse: explore\n\n"
-                            + "Creative mode and operator access are enabled.",
+                                + "Your atlas is in your offhand.\n\n"
+                                + "M: open atlas\n"
+                                + "N: toggle travel map\n"
+                                + "WASD + mouse: explore\n\n"
+                                + "Creative mode and operator access are enabled.",
                         "1. EXPLORE\n\n"
                             + "Walk east across the bridge. Blank terrain fills as you travel.\n\n"
                             + "Open M. Drag to pan; scroll to zoom. Recenter returns to you.\n\n"
@@ -260,17 +293,17 @@ public final class AtlasPlaytest {
                             + "You can pack and redeploy the camp to check that its marker follows"
                             + " it.",
                         "5. CARTOGRAPHY\n\n"
-                            + "Table: 6, 64, -7\n\n"
-                            + "Map + book: new atlas\n"
-                            + "Atlas + map: bind\n"
-                            + "Atlas + shears: recover\n\n"
-                            + "Spare supplies are in your inventory. Duplicate map IDs are"
-                            + " refused.",
+                                + "Table: 6, 64, -7\n\n"
+                                + "Map + book: new atlas\n"
+                                + "Atlas + map: bind\n"
+                                + "Atlas + shears: recover\n\n"
+                                + "Spare supplies are in your inventory. Duplicate map IDs are"
+                                + " refused.",
                         "6. WRAP UP\n\n"
-                            + "Try a copied or locked sheet and toggle N. Move the atlas out of"
-                            + " both hands: the travel view disappears.\n\n"
-                            + "Lost? /tp @s 4 64 -8\n\n"
-                            + "Quit when done. Relaunching resets this practice world.");
+                                + "Try a copied or locked sheet and toggle N. Move the atlas out of"
+                                + " both hands: the travel view disappears.\n\n"
+                                + "Lost? /tp @s 4 64 -8\n\n"
+                                + "Quit when done. Relaunching resets this practice world.");
         var book = new ItemStack(Items.WRITTEN_BOOK);
         book.set(
                 DataComponents.WRITTEN_BOOK_CONTENT,

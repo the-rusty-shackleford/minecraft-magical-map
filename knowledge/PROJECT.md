@@ -32,3 +32,11 @@ shader client reached `atlas playtest: READY` with two sheets, two player marker
 an active camp, village teleport and the field guide; the simulated player's
 connection remained active beyond 40 seconds. The starting travel view was
 visually inspected. User interaction and feedback remain pending.
+
+Rusty's first interactive test reported severe stutter: its launcher had inherited
+the automated booth's software-rendering overrides. The interactive launcher now
+uses the desktop GPU, rejects software OpenGL, and defaults to a 120 FPS cap.
+`--resume` retains the existing practice world and player state. The corrected
+launch resumed the saved course with the hardware renderer and logged 60 FPS
+with the same shader pack. Compilation and shell checks passed. This corrects
+the original playtest's rendering environment; it is not a live-server release.

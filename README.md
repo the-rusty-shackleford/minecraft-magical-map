@@ -121,15 +121,18 @@ village discovery test. Spare cartography supplies are in your inventory.
 
 Press **M** for the atlas and **N** for the travel map. The cartography table is at
 `6, 64, -7`; `/tp @s 4 64 -8` returns you to the starting area. The launcher leaves
-all controls with you and stays open until you quit. Close Minecraft to finish;
-the launcher closes its own Xephyr window afterward.
+all controls with you and stays open until you quit. It opens a normal desktop
+window using the native GPU driver, clears software-rendering overrides, and
+refuses a software OpenGL renderer. The interactive FPS cap is 120.
 
-Each launch resets only `run/playtest/saves/atlas-playtest`, so practice changes
-are disposable. It requires the three integration jars below and a template at
+By default, each launch resets only `run/playtest/saves/atlas-playtest`, so practice
+changes are disposable. Use `bash devtools/playtest.sh --resume` to retain your
+current practice world, inventory, explored terrain and landmarks. It requires
+the three integration jars below and a template at
 `run/world/level.dat` (create it with `./gradlew runGameTestServer`). Shader/runtime
-files are copied from the booth setup below. The launcher checks host processes
-and reuses an existing Xephyr; run it from your desktop with no other Minecraft
-client running. Direct `runPlaytest` is available for an already managed display.
+files are copied from the booth setup below on a fresh launch. The launcher checks
+host processes; run it from your desktop with no other Minecraft client running.
+Direct `runPlaytest` is available for an already managed hardware display.
 
 ### Automated gates
 

@@ -33,6 +33,7 @@ def boothWorld = tasks.register('prepareBoothWorld', Sync) {
     }
 }
 def playtestWorld = tasks.register('preparePlaytestWorld', Sync) {
+    onlyIf { !project.hasProperty('playtestResume') }
     outputs.upToDateWhen { false }
     doFirst {
         if (!file('run/world/level.dat').isFile()) {
@@ -48,7 +49,7 @@ def playtestWorld = tasks.register('preparePlaytestWorld', Sync) {
     doLast {
         file('run/playtest/config').mkdirs()
         file('run/playtest/config/fml.toml').text = 'disableConfigWatcher=true\nearlyWindowControl=false\n'
-        file('run/playtest/options.txt').text = 'onboardAccessibility:false\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nrenderDistance:8\nsimulationDistance:5\nmaxFps:30\nguiScale:2\ntutorialStep:none\n'
+        file('run/playtest/options.txt').text = 'onboardAccessibility:false\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nrenderDistance:8\nsimulationDistance:5\nmaxFps:120\nguiScale:2\ntutorialStep:none\n'
         copy { from 'run/booth/mods'; into 'run/playtest/mods' }
         copy { from 'run/booth/shaderpacks'; into 'run/playtest/shaderpacks' }
         copy { from 'run/booth/config/iris.properties'; into 'run/playtest/config' }
@@ -82,6 +83,7 @@ neoForge {
             sourceSet = sourceSets.gametest
             gameDirectory = file('run/playtest')
             systemProperty 'magicalmap.playtest', 'true'
+            systemProperty 'magicalmap.playtest.resume', project.hasProperty('playtestResume').toString()
             programArguments.addAll('--quickPlaySingleplayer', 'atlas-playtest', '--width', '1280', '--height', '720')
             taskBefore playtestWorld
         }
@@ -129,6 +131,13 @@ tasks.named('runPhotoBooth') {
     }
 }
 tasks.named('prepareBoothWorld') { mustRunAfter 'runGameTestServer' }
+tasks.named('runPlaytest') {
+    doFirst {
+        if (project.hasProperty('playtestResume') && !file('run/playtest/saves/atlas-playtest/level.dat').isFile()) {
+            throw new GradleException('No practice world to resume; launch without --resume first')
+        }
+    }
+}
 tasks.named('check') {
     if (!project.hasProperty('skipGameTests')) dependsOn 'runGameTestServer'
     if (!project.hasProperty('skipBooth')) dependsOn 'runPhotoBooth'

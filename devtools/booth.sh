@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
+case "${1:-}" in
+    '') interactive=false ;;
+    --interactive) interactive=true ;;
+    *) echo 'Usage: booth.sh [--interactive]'; exit 2 ;;
+esac
+mkdir -p run
 # Run with host process visibility. Inspect before launch; never open a second rendering client.
 uv run --no-project --python 3.14 python - <<'PY'
 from pathlib import Path
@@ -39,4 +45,8 @@ export DISPLAY="$display"
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export __GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
 export MESA_GL_VERSION_OVERRIDE=4.6 MESA_GLSL_VERSION_OVERRIDE=460
-timeout --kill-after=10s 300s ./gradlew runPhotoBooth --offline
+if "$interactive"; then
+    ./gradlew runPlaytest --offline
+else
+    timeout --kill-after=10s 300s ./gradlew runPhotoBooth --offline
+fi

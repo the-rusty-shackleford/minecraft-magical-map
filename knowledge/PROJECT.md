@@ -22,3 +22,13 @@ There is no live-server or assembled-pack verification and no release authorizat
 The optional integration bridges use validated reflection until their source mods
 provide a published API. The public provider protocol is documented in
 [location-providers.md](../docs/location-providers.md).
+
+The hands-on course is launched with `bash devtools/playtest.sh`. It has a separate,
+disposable world, a field guide, real integration fixtures and a moving simulated
+second player. See the README for the route and controls. It is separate from the
+automated booth and is never a prerequisite that blocks unattended `check` runs.
+On 2026-09-20 its Java compilation and launcher shell checks passed. The actual
+shader client reached `atlas playtest: READY` with two sheets, two player markers,
+an active camp, village teleport and the field guide; the simulated player's
+connection remained active beyond 40 seconds. The starting travel view was
+visually inspected. User interaction and feedback remain pending.

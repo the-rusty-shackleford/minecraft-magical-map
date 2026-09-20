@@ -32,6 +32,28 @@ def boothWorld = tasks.register('prepareBoothWorld', Sync) {
         file('run/booth/options.txt').text = 'onboardAccessibility:false\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nrenderDistance:8\nsimulationDistance:5\nmaxFps:30\nguiScale:2\ntutorialStep:none\n'
     }
 }
+def playtestWorld = tasks.register('preparePlaytestWorld', Sync) {
+    outputs.upToDateWhen { false }
+    doFirst {
+        if (!file('run/world/level.dat').isFile()) {
+            throw new GradleException('Create the disposable template first: ./gradlew runGameTestServer')
+        }
+        ['mobilecamp-0.2.0.jar', 'villagedeed-1.0.0.jar', 'thief-neoforge-1.21.1-1.2.4.jar'].each { name ->
+            if (!file("devtools/integration/${name}").isFile()) throw new GradleException("Playtest requires devtools/integration/${name}")
+        }
+    }
+    from 'run/world'
+    into 'run/playtest/saves/atlas-playtest'
+    exclude 'session.lock'
+    doLast {
+        file('run/playtest/config').mkdirs()
+        file('run/playtest/config/fml.toml').text = 'disableConfigWatcher=true\nearlyWindowControl=false\n'
+        file('run/playtest/options.txt').text = 'onboardAccessibility:false\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nrenderDistance:8\nsimulationDistance:5\nmaxFps:30\nguiScale:2\ntutorialStep:none\n'
+        copy { from 'run/booth/mods'; into 'run/playtest/mods' }
+        copy { from 'run/booth/shaderpacks'; into 'run/playtest/shaderpacks' }
+        copy { from 'run/booth/config/iris.properties'; into 'run/playtest/config' }
+    }
+}
 neoForge {
     version = '21.1.248'
     parchment { minecraftVersion = '1.21.1'; mappingsVersion = '2024.11.17' }
@@ -55,6 +77,14 @@ neoForge {
             taskBefore boothWorld
             taskBefore prepare
         }
+        playtest {
+            client()
+            sourceSet = sourceSets.gametest
+            gameDirectory = file('run/playtest')
+            systemProperty 'magicalmap.playtest', 'true'
+            programArguments.addAll('--quickPlaySingleplayer', 'atlas-playtest', '--width', '1280', '--height', '720')
+            taskBefore playtestWorld
+        }
         configureEach { logLevel = org.slf4j.event.Level.INFO }
     }
     mods {
@@ -63,7 +93,7 @@ neoForge {
     }
     addModdingDependenciesTo(sourceSets.gametest)
 }
-neoForge.runs.matching { !(it.name in ['gameTestServer', 'photoBooth']) }.configureEach {
+neoForge.runs.matching { !(it.name in ['gameTestServer', 'photoBooth', 'playtest']) }.configureEach {
     loadedMods = neoForge.mods.matching { it.name != 'magicalmap_gametest' }
 }
 dependencies {

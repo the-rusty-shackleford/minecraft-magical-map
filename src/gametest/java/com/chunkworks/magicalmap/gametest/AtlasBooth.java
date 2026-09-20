@@ -355,7 +355,8 @@ public final class AtlasBooth {
                         });
     }
 
-    private static void prepare(ServerPlayer p) {
+    /** Shared disposable landscape; returns the simulated second player for manual playtests. */
+    static ServerPlayer prepare(ServerPlayer p) {
         var level = p.serverLevel();
         level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, p.server);
         level.setDayTime(2500);
@@ -491,6 +492,7 @@ public final class AtlasBooth {
         peer.setNoGravity(true);
         peer.moveTo(-5.5, 64, -20.5, 90, 0);
         ready = true;
+        return peer;
     }
 
     private static void check(boolean value, String description) {

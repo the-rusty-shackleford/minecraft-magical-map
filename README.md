@@ -105,6 +105,34 @@ message. Future mods should implement the public provider port directly.
 
 Java 21 is required. The Gradle wrapper is included.
 
+### Interactive playtest
+
+```sh
+bash devtools/playtest.sh
+```
+
+This opens a muted, hands-on course with operator access and creative mode. Your
+offhand holds a partly explored two-sheet atlas; hotbar slot 1 holds a seven-page
+field guide. Walk east across the bridge to reveal the frontier, track the mine,
+create and edit landmarks, and try village/C.A.M.P. teleports. A moving **Surveyor**
+simulates another server player without running a second rendering client. The
+village is a small built fixture with a real Village Deed claim, not a generated
+village discovery test. Spare cartography supplies are in your inventory.
+
+Press **M** for the atlas and **N** for the travel map. The cartography table is at
+`6, 64, -7`; `/tp @s 4 64 -8` returns you to the starting area. The launcher leaves
+all controls with you and stays open until you quit. Close Minecraft to finish;
+the launcher closes its own Xephyr window afterward.
+
+Each launch resets only `run/playtest/saves/atlas-playtest`, so practice changes
+are disposable. It requires the three integration jars below and a template at
+`run/world/level.dat` (create it with `./gradlew runGameTestServer`). Shader/runtime
+files are copied from the booth setup below. The launcher checks host processes
+and reuses an existing Xephyr; run it from your desktop with no other Minecraft
+client running. Direct `runPlaytest` is available for an already managed display.
+
+### Automated gates
+
 ```sh
 JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew test runGameTestServer jar
 ```

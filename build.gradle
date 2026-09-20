@@ -1,0 +1,105 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.144'
+}
+version = mod_version
+group = 'com.chunkworks.magicalmap'
+base { archivesName = 'magicalmap' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+repositories { mavenCentral() }
+sourceSets { domain; gametest }
+def prepare = tasks.register('prepareVerification') {
+    doLast {
+        ['run/config', 'run/booth/config'].each { name ->
+            def directory = file(name)
+            directory.mkdirs()
+            new File(directory, 'fml.toml').text = 'disableConfigWatcher=true\nearlyWindowControl=false\n'
+        }
+    }
+}
+def resetWorld = tasks.register('resetGameTestWorld', Delete) { delete 'run/world' }
+def structures = tasks.register('copyGameTestStructures', Copy) {
+    from 'devtools/gameteststructures'
+    into 'run/gameteststructures'
+}
+def boothWorld = tasks.register('prepareBoothWorld', Sync) {
+    outputs.upToDateWhen { false }
+    doFirst { delete 'run/booth/screenshots' }
+    from 'run/world'
+    into 'run/booth/saves/booth'
+    exclude 'session.lock'
+    doLast {
+        file('run/booth/options.txt').text = 'onboardAccessibility:false\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nrenderDistance:8\nsimulationDistance:5\nmaxFps:30\nguiScale:2\ntutorialStep:none\n'
+    }
+}
+neoForge {
+    version = '21.1.248'
+    parchment { minecraftVersion = '1.21.1'; mappingsVersion = '2024.11.17' }
+    runs {
+        client { client() }
+        server { server(); programArgument '--nogui' }
+        gameTestServer {
+            type = 'gameTestServer'
+            sourceSet = sourceSets.gametest
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'magicalmap'
+            taskBefore structures
+            taskBefore resetWorld
+            taskBefore prepare
+        }
+        photoBooth {
+            client()
+            sourceSet = sourceSets.gametest
+            gameDirectory = file('run/booth')
+            systemProperty 'magicalmap.booth', 'true'
+            programArguments.addAll('--quickPlaySingleplayer', 'booth', '--width', '1280', '--height', '720')
+            taskBefore boothWorld
+            taskBefore prepare
+        }
+        configureEach { logLevel = org.slf4j.event.Level.INFO }
+    }
+    mods {
+        magicalmap { sourceSet(sourceSets.domain); sourceSet(sourceSets.main) }
+        magicalmap_gametest { sourceSet(sourceSets.gametest) }
+    }
+    addModdingDependenciesTo(sourceSets.gametest)
+}
+neoForge.runs.matching { !(it.name in ['gameTestServer', 'photoBooth']) }.configureEach {
+    loadedMods = neoForge.mods.matching { it.name != 'magicalmap_gametest' }
+}
+dependencies {
+    implementation sourceSets.domain.output
+    gametestImplementation sourceSets.main.output
+    gametestImplementation sourceSets.domain.output
+    testImplementation sourceSets.domain.output
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
+    // Optional, actual upstream jars for integration verification. Never embedded.
+    gametestRuntimeOnly fileTree('devtools/integration') { include '*.jar' }
+}
+tasks.named('test', Test) { useJUnitPlatform() }
+jar { from sourceSets.domain.output }
+tasks.named('processResources') {
+    inputs.property 'version', version
+    filesMatching('META-INF/neoforge.mods.toml') { expand version: project.version }
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.named('runGameTestServer') {
+    doLast {
+        def log = file('run/logs/latest.log').text
+        def passed = log =~ /All (\d+) required tests passed/
+        if (!passed.find() || log.contains('Mod loading has failed')) throw new GradleException('GameTests failed')
+        logger.lifecycle('GameTests: ' + passed.group(1) + ' passed')
+    }
+}
+tasks.named('runPhotoBooth') {
+    mustRunAfter 'runGameTestServer'
+    doLast {
+        def log = file('run/booth/logs/latest.log').text
+        if (!log.contains('atlas booth: COMPLETE') || log.contains('atlas booth: FAIL')) throw new GradleException('Atlas booth failed')
+    }
+}
+tasks.named('prepareBoothWorld') { mustRunAfter 'runGameTestServer' }
+tasks.named('check') {
+    if (!project.hasProperty('skipGameTests')) dependsOn 'runGameTestServer'
+    if (!project.hasProperty('skipBooth')) dependsOn 'runPhotoBooth'
+}

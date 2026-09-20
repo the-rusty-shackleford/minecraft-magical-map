@@ -1,0 +1,23 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="AGPL-3.0-or-later"
+[[mods]]
+modId="magicalmap"
+version="${version}"
+displayName="Magical Map"
+authors="Rusty Shackleford and nfx"
+description='''An atlas of real maps with live locations and personal landmarks.'''
+[[mixins]]
+config="magicalmap.mixins.json"
+[[dependencies.magicalmap]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.248,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.magicalmap]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"

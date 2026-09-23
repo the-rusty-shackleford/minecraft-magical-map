@@ -5,6 +5,7 @@ import com.chunkworks.magicalmap.api.Location;
 
 import net.minecraft.core.*;
 import net.minecraft.server.level.*;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -17,16 +18,26 @@ public final class SafeArrival {
     private SafeArrival() {}
 
     /**
-     * requires: operator-authorized action; effects: loads only an existing destination chunk;
-     * throws: world storage failure. Null chunks mean absent terrain and refuse arrival.
+     * requires: operator-authorized action; effects: makes the destination chunk available when
+     * it is in memory or fully generated on disk, pinning it briefly for the arrival as the
+     * vanilla teleport does; returns whether it is. Never generates terrain: a chunk absent from
+     * disk, or saved before it was fully generated, refuses arrival. throws: world storage failure.
      */
-    public static boolean loadDestination(ServerLevel level, Location location) {
-        return level.getChunk(
-                        (int) Math.floor(location.x()) >> 4,
-                        (int) Math.floor(location.z()) >> 4,
-                        ChunkStatus.FULL,
-                        false)
-                != null;
+    public static boolean loadDestination(ServerLevel level, Location location, int ticket) {
+        var pos = new ChunkPos((int) Math.floor(location.x()) >> 4, (int) Math.floor(location.z()) >> 4);
+        if (level.getChunk(pos.x, pos.z, ChunkStatus.FULL, false) != null) return true;
+        if (!fullOnDisk(level, pos)) return false;
+        level.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, pos, 1, ticket);
+        return level.getChunk(pos.x, pos.z, ChunkStatus.FULL, true) != null;
+    }
+
+    /**
+     * effects: whether the chunk is saved on disk at full generation status, read without loading
+     * it; throws: world storage failure.
+     */
+    public static boolean fullOnDisk(ServerLevel level, ChunkPos pos) {
+        var tag = level.getChunkSource().chunkMap.read(pos).join();
+        return tag.isPresent() && "minecraft:full".equals(tag.get().getString("Status"));
     }
 
     /**
@@ -78,12 +89,10 @@ public final class SafeArrival {
     private static boolean dangerous(Block block) {
         return block instanceof CampfireBlock
                 || block instanceof FireBlock
+                || block instanceof MagmaBlock
                 || block instanceof CactusBlock
                 || block instanceof SweetBerryBushBlock
-                || block == Blocks.MAGMA_BLOCK
-                || block == Blocks.POWDER_SNOW
-                || block == Blocks.WITHER_ROSE
-                || block == Blocks.END_PORTAL
-                || block == Blocks.NETHER_PORTAL;
+                || block instanceof WitherRoseBlock
+                || block instanceof PowderSnowBlock;
     }
 }

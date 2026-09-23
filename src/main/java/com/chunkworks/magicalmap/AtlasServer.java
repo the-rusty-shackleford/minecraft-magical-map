@@ -333,7 +333,7 @@ public final class AtlasServer {
                 player.server.getLevel(
                         ResourceKey.create(
                                 Registries.DIMENSION, ResourceLocation.parse(target.dimension())));
-        if (level == null || !SafeArrival.loadDestination(level, target))
+        if (level == null || !SafeArrival.loadDestination(level, target, player.getId()))
             throw new IllegalArgumentException("Destination terrain is unavailable");
         var current =
                 provider.resolve(viewer(player), id)

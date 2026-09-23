@@ -21,6 +21,14 @@ and "Choose a destination" overlapped. Any 1080p window at scale 4 (270 rows) ha
 the booth's 360 rows never showed it. See [D-0003](decisions/D-0003.md). The booth now
 also photographs the atlas at 720p scale 3, the 240-row worst case.
 
+Also in 0.2.2: Rusty's teleport to their own village answered "Destination terrain is
+unavailable". The arrival check asked for the chunk with create=false, which only finds
+chunks already in memory, so every destination the player was not standing near was
+refused. It now reads the chunk from disk, accepts it only at full generation status, pins
+it with the vanilla post-teleport ticket and loads it; terrain is still never generated.
+See [D-0004](decisions/D-0004.md). Three GameTests cover in memory, on disk and never
+generated.
+
 Rusty selected an atlas built from real vanilla map sheets, revealed through
 exploration with a meaningful cartography-table workflow. See
 [D-0001](decisions/D-0001.md). Live players, owned villages, the viewer's deployed

@@ -4,7 +4,11 @@
 list drew over "Choose a destination" (D-0003).
 
 - `./gradlew test`: 12 JUnit tests.
-- `./gradlew runGameTestServer`: 13 real-server GameTests.
+- `./gradlew runGameTestServer`: 16 real-server GameTests, three new in `ArrivalGameTests`:
+  a loaded destination chunk is available; a chunk generated 50,000 blocks away and saved is
+  found on disk at full status and loaded for the arrival; a never-generated chunk is refused
+  and stays ungenerated (Rusty's "Destination terrain is unavailable" at their own village,
+  D-0004). The booth's village teleport phase, run before this change, covers the loaded case.
 - `devtools/booth.sh` flow run through `runPhotoBooth` on an iconified Xephyr display,
   muted, beside Rusty's own client: COMPLETE, twenty-four phases. Three new phases switch to
   GUI scale 3 at 720p, the 240-row worst case, and assert the stacked sidebar, list mode
@@ -17,5 +21,5 @@ list drew over "Choose a destination" (D-0003).
   rows is unchanged, as its earlier photos show.
 - The booth's cartography step now waits for the screen instead of a fixed 15 ticks; it
   had flaked twice under CPU contention.
-- `./gradlew build -PskipBooth`: green; jar `magicalmap-0.2.2.jar` sha1 `9778cfd8486ea71d8c741963829ca0db4ae6b800`. Built
+- `./gradlew build -PskipBooth`: green; jar `magicalmap-0.2.2.jar` sha1 `bc877cbb02e8ddddc5db816d61a0c922c9ec290c`. Built
   and committed; release waits on Rusty's go.

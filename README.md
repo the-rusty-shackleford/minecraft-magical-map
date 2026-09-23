@@ -10,7 +10,10 @@ on client and server. Village Deed, C.A.M.P. and EMI integrations are optional.
 0.2.2 fixes the sidebar on short screens (1080p at GUI scale 4, ultrawides at scale 5):
 the location list and the destination panel no longer draw over each other. When the
 window is under 301 GUI rows tall the list fills the sidebar until you select a location,
-whose details then take its place with a **Back to list** button.
+whose details then take its place with a **Back to list** button. It also fixes operator
+teleport refusing any destination whose chunk was not already loaded ("Destination terrain
+is unavailable"); a destination saved on disk is loaded for the arrival, and terrain is
+still never generated.
 
 ![The atlas with two player heads, village, camp and landmark markers](devtools/verification/0.1.0/atlas.png)
 

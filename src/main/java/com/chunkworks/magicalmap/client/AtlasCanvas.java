@@ -100,7 +100,7 @@ public final class AtlasCanvas {
         }
         var hits = new ArrayList<Hit>();
         for (var ids : groups.values()) {
-            var key = ids.contains(AtlasClient.selected) ? AtlasClient.selected : ids.getFirst();
+            var key = com.chunkworks.magicalmap.domain.Selection.pick(ids, AtlasClient.selected);
             int[] pos = coordinates.get(key);
             var location = AtlasClient.places.get(key).value;
             icon(g, location, pos[0] - 7, pos[1] - 7, 14, key.equals(AtlasClient.selected));

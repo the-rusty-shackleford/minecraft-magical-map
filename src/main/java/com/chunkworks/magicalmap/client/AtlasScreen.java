@@ -497,8 +497,7 @@ public final class AtlasScreen extends Screen {
             if (button == 0) {
                 for (var hit : hits)
                     if (Math.abs(hit.x() - x) < 10 && Math.abs(hit.y() - y) < 10) {
-                        int next = (hit.ids().indexOf(AtlasClient.selected) + 1) % hit.ids().size();
-                        AtlasClient.selected = hit.ids().get(next);
+                        AtlasClient.selected = com.chunkworks.magicalmap.domain.Selection.next(hit.ids(), AtlasClient.selected);
                         return true;
                     }
                 dragging = true;

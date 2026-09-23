@@ -10,6 +10,11 @@ cartography-table operations under a "Cartography Table" category. See
 [D-0002](decisions/D-0002.md). The operations are data in the domain
 (`AtlasRecipes`, JUnit-tested); the plugin only loads when EMI is present.
 
+Version 0.2.1 (2026-09-22): Rusty's client crashed on clicking a map icon with nothing
+selected: the icon's id list is immutable and was asked `indexOf(null)`. The cycling and
+pick logic moved to the domain (`Selection`, JUnit-tested with the null case); the canvas
+and screen call it.
+
 Rusty selected an atlas built from real vanilla map sheets, revealed through
 exploration with a meaningful cartography-table workflow. See
 [D-0001](decisions/D-0001.md). Live players, owned villages, the viewer's deployed

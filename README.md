@@ -4,7 +4,7 @@ A physical atlas for Minecraft 1.21.1 and NeoForge 21.1.248. Join real vanilla m
 chart the world through exploration, and navigate with player heads, owned villages,
 your deployed C.A.M.P. and private landmarks.
 
-**0.2.2.** Install matching versions
+**0.2.3.** Install matching versions
 on client and server. Village Deed, C.A.M.P. and EMI integrations are optional.
 0.2.1 fixes a client crash when clicking a map icon before any location was selected.
 0.2.2 fixes the sidebar on short screens (1080p at GUI scale 4, ultrawides at scale 5):
@@ -13,7 +13,9 @@ window is under 301 GUI rows tall the list fills the sidebar until you select a 
 whose details then take its place with a **Back to list** button. It also fixes operator
 teleport refusing any destination whose chunk was not already loaded ("Destination terrain
 is unavailable"); a destination saved on disk is loaded for the arrival, and terrain is
-still never generated. Your own landmarks are now teleport targets for operators.
+still never generated. Your own landmarks are now teleport targets for operators; 0.2.3
+puts Edit and Delete on their own row beneath Teleport so the three no longer overlap, and
+folds sheets that chart the same square into one, so the sheet count matches what you see.
 
 ![The atlas with two player heads, village, camp and landmark markers](devtools/verification/0.1.0/atlas.png)
 
@@ -28,6 +30,7 @@ Use a **cartography table**:
 |---|---|---|
 | Filled map | Book | Magical Atlas containing that map |
 | Magical Atlas | Another filled map | Bind that sheet into the atlas |
+| Magical Atlas | A filled map of a cell the atlas already charts | Fold it: its charted pixels join that sheet, the map is consumed, the count stays |
 | Magical Atlas | Shears | Recover the last sheet; the remaining atlas stays in the first slot |
 
 The atlas sits in its own **Magical Map** creative tab beside the vanilla tabs, and in
@@ -36,8 +39,13 @@ Tools & Utilities. With **EMI** installed, the three table operations above appe
 table's behaviour is a menu extension, not a crafting recipe, which is why a recipe viewer
 needs this plugin to show it.
 
-An atlas holds up to **64 distinct map IDs**. Duplicate copies of the same map are
-refused without consuming either input. Shears lose one durability per extraction
+An atlas holds up to **64 sheets, one per cell**: a cell is one dimension, one scale and one
+128-block map square. Two maps started in the same square get different IDs but chart the
+same blocks, so binding the second folds it into the first (a pixel the atlas already
+charts is kept; banner markers on the folded map are not carried over). Duplicate copies of
+the same map, which share its ID, are refused without consuming either input. An atlas made
+before 0.2.3 that charts a cell twice folds the moment you hold it, and chat says how many
+sheets folded. Shears lose one durability per extraction
 in survival; creative shears do not wear. An empty atlas can accept maps again.
 
 Prepare sheets with ordinary cartography: paper expands a map's coverage, an empty

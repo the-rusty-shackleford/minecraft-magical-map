@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.*;
@@ -239,6 +240,71 @@ public final class AtlasGameTests {
         h.assertTrue(
                 !AtlasPages.charted(atlas, h.getLevel(), dimension, sheet.left() + 1, sheet.top()),
                 "neighbor stays blank");
+        h.succeed();
+    }
+
+    @GameTest(template = "arena")
+    public void mapOfAChartedCellFoldsIntoTheAtlasAndItsPixelsJoin(GameTestHelper h) {
+        var p = h.makeMockPlayer(GameType.SURVIVAL);
+        var menu = table(h, p);
+        var kept = map(h, 0);
+        var spare = map(h, 0);
+        var keptId = kept.get(DataComponents.MAP_ID);
+        h.assertFalse(
+                keptId.equals(spare.get(DataComponents.MAP_ID)),
+                "two maps started in one cell have distinct ids");
+        MapItem.getSavedData(kept, h.getLevel()).setColor(7, 8, (byte) 42);
+        MapItem.getSavedData(spare, h.getLevel()).setColor(7, 8, (byte) 99);
+        MapItem.getSavedData(spare, h.getLevel()).setColor(9, 9, (byte) 31);
+        menu.getSlot(0).set(AtlasPages.create(List.of(kept)));
+        menu.getSlot(1).set(spare.copy());
+        h.assertTrue(
+                AtlasPages.maps(menu.getSlot(2).getItem()).size() == 1,
+                "the table offers the atlas unchanged for a map of a charted cell");
+        menu.clicked(2, 0, ClickType.PICKUP, p);
+        var result = menu.getCarried();
+        h.assertTrue(
+                result.is(MagicalMap.ATLAS.get())
+                        && AtlasPages.maps(result).size() == 1
+                        && AtlasPages.maps(result).getFirst().get(DataComponents.MAP_ID).equals(keptId),
+                "the atlas keeps its one sheet");
+        h.assertTrue(
+                menu.getSlot(0).getItem().isEmpty() && menu.getSlot(1).getItem().isEmpty(),
+                "the folded map is consumed");
+        var colors = h.getLevel().getMapData(keptId).colors;
+        h.assertTrue(
+                colors[7 + 8 * 128] == 42 && colors[9 + 9 * 128] == 31,
+                "the spare's charted pixels join and the kept pixel wins");
+        h.succeed();
+    }
+
+    @GameTest(template = "arena")
+    public void heldAtlasChartingACellTwiceFoldsOntoTheCellsFirstSheet(GameTestHelper h) {
+        var p = h.makeMockPlayer(GameType.SURVIVAL);
+        var first = map(h, 0);
+        var again = map(h, 0);
+        var other = map(h, 128);
+        var third = map(h, 0);
+        MapItem.getSavedData(first, h.getLevel()).setColor(1, 1, (byte) 10);
+        MapItem.getSavedData(again, h.getLevel()).setColor(2, 2, (byte) 20);
+        MapItem.getSavedData(third, h.getLevel()).setColor(1, 1, (byte) 77);
+        MapItem.getSavedData(third, h.getLevel()).setColor(3, 3, (byte) 30);
+        var atlas = AtlasPages.create(List.of(first, again, other, third));
+        atlas.set(DataComponents.CUSTOM_NAME, Component.literal("Nine sheets"));
+        p.setItemInHand(InteractionHand.OFF_HAND, atlas);
+        h.assertTrue(AtlasPages.foldHeld(p, h.getLevel()) == 2, "two spare sheets fold");
+        var held = p.getOffhandItem();
+        var ids = AtlasPages.maps(held).stream().map(m -> m.get(DataComponents.MAP_ID)).toList();
+        h.assertTrue(
+                ids.equals(List.of(first.get(DataComponents.MAP_ID), other.get(DataComponents.MAP_ID))),
+                "the first sheet of each cell is kept, in atlas order");
+        h.assertTrue(
+                held.getHoverName().getString().equals("Nine sheets"), "the atlas keeps its name");
+        var colors = h.getLevel().getMapData(first.get(DataComponents.MAP_ID)).colors;
+        h.assertTrue(
+                colors[1 + 128] == 10 && colors[2 + 2 * 128] == 20 && colors[3 + 3 * 128] == 30,
+                "both spares' pixels join the kept sheet and its own pixel wins");
+        h.assertTrue(AtlasPages.foldHeld(p, h.getLevel()) == 0, "a folded atlas folds no further");
         h.succeed();
     }
 }

@@ -26,8 +26,8 @@ public final class AtlasScreen extends Screen {
             editButton,
             deleteButton;
     private int sidebar, listTop, listBottom, scroll, detailTop;
-    /** Sidebar rows needed to show the list and the full detail block at once. */
-    static final int MIN_DUAL = 128 + 23 + 8 + 142;
+    /** Sidebar rows needed to show the list and the tallest detail block (three button rows). */
+    static final int MIN_DUAL = 128 + 23 + 8 + 166;
     private boolean stacked, showList = true, showDetails = true;
     private AtlasButton backButton;
     private boolean dragging;
@@ -211,10 +211,16 @@ public final class AtlasScreen extends Screen {
     public boolean stacked() {
         return stacked;
     }
+    /** effects: the list's top row y, as laid out this frame. */
+    public int listTop() { return listTop; }
+    /** effects: how many list rows are visible this frame. */
+    public int visibleRows() { return Math.max(1, (listBottom - listTop - 10) / 23); }
 
     /**
-     * effects: places the sidebar for the current height and selection. Tall screens show the
-     * list above a bottom-anchored detail block. Screens shorter than {@link #MIN_DUAL} rows
+     * effects: places the sidebar for the current height and selection. Runs before every frame,
+     * before every click or scroll (so a hit-test never uses the geometry of a selection that
+     * has since changed) and after every click (so widgets show and hide with the selection at
+     * once, not at the next frame). Tall screens show the list above a bottom-anchored detail block. Screens shorter than {@link #MIN_DUAL} rows
      * cannot hold both, so the list fills the sidebar until a location is selected, when the
      * details take its place under a "Back to list" button.
      */
@@ -225,19 +231,22 @@ public final class AtlasScreen extends Screen {
         search.visible = showList;
         kindButton.visible = showList;
         backButton.visible = stacked && place != null;
-        listTop = 128;
-        listBottom = stacked ? height - 44 : Math.max(listTop + 20, height - 157);
-        detailTop = stacked ? 107 : height - 142;
-        trackButton.setY(detailTop + (stacked ? 54 : 65));
-        int second = detailTop + (stacked ? 76 : 89);
-        teleportButton.setY(second);
-        editButton.setY(second);
-        deleteButton.setY(second);
         trackButton.visible = showDetails && place != null;
         teleportButton.visible = showDetails && place != null && place.teleportable();
         editButton.visible =
                 deleteButton.visible =
                         showDetails && place != null && place.provider().equals(Landmarks.ID);
+        // Teleport and Edit/Delete share the second row unless both apply (a landmark for an
+        // operator), when Edit/Delete take a third row and the tall layout grows to hold it.
+        boolean third = teleportButton.visible && editButton.visible;
+        listTop = 128;
+        detailTop = stacked ? 107 : height - (third ? 166 : 142);
+        listBottom = stacked ? height - 44 : Math.max(listTop + 20, detailTop - 15);
+        trackButton.setY(detailTop + (stacked ? 54 : 65));
+        int second = detailTop + (stacked ? 76 : 89), rowThree = detailTop + (stacked ? 98 : 113);
+        teleportButton.setY(second);
+        editButton.setY(third ? rowThree : second);
+        deleteButton.setY(third ? rowThree : second);
     }
 
     private void fitSheets() {
@@ -401,7 +410,12 @@ public final class AtlasScreen extends Screen {
                 }
     }
 
-    private void renderRows(GuiGraphics g, int mouseX, int mouseY) {
+    /**
+     * effects: rebuilds the row list when the places, the query, the dimension or the kind changed
+     * since it was last built. Called before every render and before every click or scroll on the
+     * list, so a hit-test never uses rows that a packet has already changed.
+     */
+    private void refreshRows() {
         String query = search.getValue().toLowerCase(Locale.ROOT);
         if (rowsRevision != AtlasClient.revision
                 || !query.equals(rowQuery)
@@ -426,8 +440,12 @@ public final class AtlasScreen extends Screen {
             rowDimension = dimension;
             rowKind = kind;
         }
+    }
+
+    private void renderRows(GuiGraphics g, int mouseX, int mouseY) {
+        refreshRows();
         if (!showList) return;
-        int count = Math.max(1, (listBottom - listTop - 10) / 23);
+        int count = visibleRows();
         scroll = Math.max(0, Math.min(scroll, Math.max(0, rows.size() - count)));
         g.fill(sidebar, listTop - 2, sidebar + 140, listBottom, 0xffc4b585);
         for (int index = scroll; index < Math.min(rows.size(), scroll + count); index++) {
@@ -530,6 +548,14 @@ public final class AtlasScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double x, double y, int button) {
+        layout();
+        boolean handled = handleClick(x, y, button);
+        layout();
+        return handled;
+    }
+
+    /** effects: the click itself; the caller lays the screen out before and after it. */
+    private boolean handleClick(double x, double y, int button) {
         if (super.mouseClicked(x, y, button)) return true;
         if (map.contains(x, y)) {
             if (button == 1) {
@@ -551,6 +577,7 @@ public final class AtlasScreen extends Screen {
             }
         }
         if (showList && button == 0 && x >= sidebar && x < sidebar + 140 && y >= listTop && y < listBottom) {
+            refreshRows();
             int index = scroll + (int) (y - listTop) / 23;
             if (index >= 0 && index < rows.size()) {
                 AtlasClient.selected = rows.get(index).key();
@@ -580,6 +607,7 @@ public final class AtlasScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {
+        layout();
         if (map.contains(x, y)) {
             double wx = centerX + (x - map.x() - map.width() / 2.0) * scale,
                     wz = centerZ + (y - map.y() - map.height() / 2.0) * scale;
@@ -589,7 +617,8 @@ public final class AtlasScreen extends Screen {
             return true;
         }
         if (showList && x >= sidebar) {
-            int visible = Math.max(1, (listBottom - listTop) / 23);
+            refreshRows();
+            int visible = visibleRows();
             scroll =
                     Math.max(
                             0,

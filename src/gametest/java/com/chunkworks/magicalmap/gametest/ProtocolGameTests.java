@@ -36,7 +36,7 @@ public final class ProtocolGameTests {
         var atlas = AtlasPages.create(maps);
         var extra = MapItem.create(h.getLevel(), 9000, 0, (byte) 0, true, false);
         h.assertTrue(
-                AtlasCartography.result(atlas, extra).isEmpty()
+                AtlasCartography.result(atlas, extra, h.getLevel()).isEmpty()
                         && AtlasPages.maps(atlas).size() == 64
                         && !extra.isEmpty(),
                 "capacity refusal preserves all 65 maps");

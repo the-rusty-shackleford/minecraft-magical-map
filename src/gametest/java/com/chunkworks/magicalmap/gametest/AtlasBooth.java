@@ -80,7 +80,8 @@ public final class AtlasBooth {
                     }
                 }
                 case 2 -> {
-                    if (mc.screen instanceof CartographyTableScreen || age > 120) {
+                    // Up to 20 s: a server 70 ticks behind under back-to-back runs missed 6 s.
+                    if (mc.screen instanceof CartographyTableScreen || age > 400) {
                         check(
                                 mc.screen instanceof CartographyTableScreen,
                                 "real cartography screen opens");
@@ -128,7 +129,10 @@ public final class AtlasBooth {
                         check(
                                 AtlasPages.maps(mc.player.containerMenu.getSlot(2).getItem()).size()
                                         == 2,
-                                "second sheet bound through client clicks");
+                                "second sheet bound through client clicks; slot 2 = "
+                                        + mc.player.containerMenu.getSlot(2).getItem()
+                                        + " maps="
+                                        + AtlasPages.maps(mc.player.containerMenu.getSlot(2).getItem()).size());
                         click(mc, 2, ClickType.QUICK_MOVE);
                         next();
                     }
@@ -139,10 +143,14 @@ public final class AtlasBooth {
                         server(
                                 mc,
                                 p -> {
-                                    var atlas = takeAtlas(p);
+                                    var atlas =
+                                            AtlasPages.add(
+                                                    takeAtlas(p),
+                                                    MapItem.create(
+                                                            p.serverLevel(), 0, 0, (byte) 0, true, false));
                                     check(
-                                            AtlasPages.maps(atlas).size() == 2,
-                                            "server atlas has both real sheets");
+                                            AtlasPages.maps(atlas).size() == 3,
+                                            "server atlas has both real sheets and a third of the first's cell");
                                     p.setItemInHand(InteractionHand.OFF_HAND, atlas);
                                     ready = true;
                                 });
@@ -152,7 +160,13 @@ public final class AtlasBooth {
                         check(
                                 AtlasClient.sheets().size() == 2
                                         && AtlasClient.loadedSheetCount() == 2,
-                                "real map textures synchronized");
+                                "real map textures synchronized, the duplicate cell folded on the way (D-0006)");
+                        server(
+                                mc,
+                                p ->
+                                        check(
+                                                AtlasPages.maps(p.getOffhandItem()).size() == 2,
+                                                "the held atlas lost its spare sheet"));
                         check(
                                 AtlasClient.locations().stream()
                                                 .filter(p -> p.kind().equals("magicalmap:player"))
@@ -343,9 +357,26 @@ public final class AtlasBooth {
                     if (age == 12) {
                         check(AtlasClient.selected() != null, "selection on the short layout");
                         photo(mc, "12-atlas-short-details");
+                        mc.screen.mouseClicked(mc.getWindow().getGuiScaledWidth() - 164 + 70, 89, 0);
                     }
-                    if (age == 20) mc.screen.mouseClicked(mc.getWindow().getGuiScaledWidth() - 164 + 70, 89, 0);
-                    if (age > 28) {
+                    if (age == 14) {
+                        check(AtlasClient.selected() == null, "Back to list before the next pick: the short layout lists only while nothing is selected");
+                        select(mc, "Booth waypoint");
+                    }
+                    if (age == 20) {
+                        check(AtlasClient.selected() != null && AtlasClient.selected().provider().equals(Landmarks.ID), "landmark selected on the short layout: selected=" + AtlasClient.selected());
+                        int teleport = -1, edit = -1, delete = -1;
+                        for (var w : mc.screen.children()) if (w instanceof net.minecraft.client.gui.components.AbstractWidget b && b.visible) {
+                            var t = b.getMessage().getString();
+                            if (t.startsWith("Teleport")) teleport = b.getY(); else if (t.equals("Edit")) edit = b.getY(); else if (t.equals("Delete")) delete = b.getY();
+                        }
+                        check(teleport >= 0 && edit >= 0 && delete >= 0, "teleport, edit and delete all offered for an operator's landmark");
+                        check(edit > teleport + 18 && delete == edit, "edit and delete sit on their own row below teleport: teleport=" + teleport + " edit=" + edit);
+                        check(delete + 19 <= mc.getWindow().getGuiScaledHeight() - 12, "third row stays inside the frame");
+                        photo(mc, "14-atlas-short-landmark-rows");
+                    }
+                    if (age == 26) mc.screen.mouseClicked(mc.getWindow().getGuiScaledWidth() - 164 + 70, 89, 0);
+                    if (age > 34) {
                         check(AtlasClient.selected() == null, "Back to list deselects");
                         photo(mc, "13-atlas-short-back");
                         mc.screen.onClose();
@@ -405,10 +436,13 @@ public final class AtlasBooth {
         int x = mc.getWindow().getGuiScaledWidth() - 150;
         // Reset the list with actual scroll input, then expose the desired row.
         for (int i = 0; i < rows.size(); i++) mc.screen.mouseScrolled(x, 135, 0, 1);
-        int visible = Math.max(1, (mc.getWindow().getGuiScaledHeight() - 157 - 128) / 23);
+        var screen = (AtlasScreen) mc.screen;
+        int visible = screen.visibleRows();
         int offset = Math.max(0, index - visible + 1);
         for (int i = 0; i < offset; i++) mc.screen.mouseScrolled(x, 135, 0, -1);
-        mc.screen.mouseClicked(x, 128 + (index - offset) * 23 + 8, 0);
+        mc.screen.mouseClicked(x, screen.listTop() + (index - offset) * 23 + 8, 0);
+        LOG.info("atlas booth: select {} -> rows={} index={} visible={} offset={} listTop={} stacked={} selected={}",
+                name, rows.stream().map(Location::name).toList(), index, visible, offset, screen.listTop(), screen.stacked(), AtlasClient.selected());
     }
 
     private static ItemStack takeAtlas(ServerPlayer player) {

@@ -106,6 +106,16 @@ public final class AtlasServer {
                         || !session.contents.equals(
                                 atlas.getOrDefault(
                                         DataComponents.CONTAINER, ItemContainerContents.EMPTY))) {
+                    int folded = AtlasPages.foldHeld(player, player.serverLevel());
+                    if (folded > 0) {
+                        // The hand now holds a new stack; the next tick opens its session.
+                        notice(
+                                player,
+                                folded
+                                        + (folded == 1 ? " duplicate sheet" : " duplicate sheets")
+                                        + " folded: every cell is charted once now.");
+                        continue;
+                    }
                     session = new Session(atlas, player);
                     SESSIONS.put(player.getUUID(), session);
                     PacketDistributor.sendToPlayer(

@@ -28,7 +28,22 @@ refused. It now reads the chunk from disk, accepts it only at full generation st
 it with the vanilla post-teleport ticket and loads it; terrain is still never generated.
 See [D-0004](decisions/D-0004.md). Three GameTests cover in memory, on disk and never
 generated. Rusty then asked for landmarks to be teleport targets like villages; they
-resolve for their owner and carry `teleportable` (D-0005), with a GameTest.
+resolve for their owner and carry `teleportable` (D-0005), with a GameTest. That put
+Teleport, Edit and Delete on one row; 0.2.3 gives Edit and Delete a third row (D-0003
+amendment).
+
+Version 0.2.3 (2026-09-23): besides the third row, Rusty's atlas said nine sheets and showed
+two regions. A sheet's identity was its map id; two maps started in the same grid square get
+different ids and identical bounds. Identity is now the cell (dimension, scale, centre): a map
+of a charted cell folds into that sheet at the table, and a held atlas charting a cell twice
+folds on the spot. See [D-0006](decisions/D-0006.md). Also fixed: the atlas screen laid out
+its sidebar only when rendering, so a click between two frames could test against the
+geometry of a stale selection, and widgets changed by a click showed only at the next frame;
+the booth hit both as flakes on the short layout under llvmpipe (a pick right after Back to
+list landed on a hidden list; a check six ticks after a pick found the buttons still hidden).
+Layout now runs before every click and scroll and again after every click. Gotcha for any
+future map work: client map data has no centre (`createForClient`), so cells can only be
+told apart on the server (D-0006).
 
 Rusty selected an atlas built from real vanilla map sheets, revealed through
 exploration with a meaningful cartography-table workflow. See

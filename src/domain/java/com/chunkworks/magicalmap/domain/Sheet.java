@@ -10,6 +10,17 @@ public record Sheet(int id, String dimension, int centerX, int centerZ, int scal
         if (id < 0 || scale < 0 || scale > 4) throw new IllegalArgumentException("Invalid sheet");
     }
 
+    /**
+     * The square a sheet charts: one dimension, one scale, one centre. Two sheets with the same
+     * cell chart the same blocks whatever their ids or locks (D-0006).
+     */
+    public record Cell(String dimension, int scale, int centerX, int centerZ) {}
+
+    /** requires: none; effects: returns this sheet's cell; throws: none. */
+    public Cell cell() {
+        return new Cell(dimension, scale, centerX, centerZ);
+    }
+
     /** requires: none; effects: returns blocks per map pixel; throws: none. */
     public int step() {
         return 1 << scale;

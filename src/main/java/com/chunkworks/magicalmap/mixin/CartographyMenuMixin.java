@@ -4,6 +4,7 @@ package com.chunkworks.magicalmap.mixin;
 import com.chunkworks.magicalmap.AtlasCartography;
 import com.chunkworks.magicalmap.MagicalMap;
 
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
@@ -21,12 +22,22 @@ public abstract class CartographyMenuMixin extends AbstractContainerMenu {
     }
 
     @Shadow @Final private ResultContainer resultContainer;
+    @Unique private Player magicalmap$player;
+
+    @Inject(
+            method =
+                    "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V",
+            at = @At("RETURN"))
+    private void atlasPlayer(
+            int id, Inventory inventory, ContainerLevelAccess access, CallbackInfo ci) {
+        magicalmap$player = inventory.player;
+    }
 
     @Inject(method = "setupResultSlot", at = @At("HEAD"), cancellable = true)
     private void atlasResult(
             ItemStack first, ItemStack second, ItemStack previous, CallbackInfo ci) {
         if (AtlasCartography.custom(first, second)) {
-            var output = AtlasCartography.result(first, second);
+            var output = AtlasCartography.result(first, second, magicalmap$player.level());
             if (!ItemStack.matches(output, previous)) resultContainer.setItem(2, output);
             ((CartographyTableMenu) (Object) this).broadcastChanges();
             ci.cancel();

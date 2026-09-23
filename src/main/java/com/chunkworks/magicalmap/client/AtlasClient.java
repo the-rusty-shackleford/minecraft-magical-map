@@ -25,6 +25,7 @@ import java.util.*;
  */
 @EventBusSubscriber(modid = MagicalMap.ID, value = Dist.CLIENT)
 public final class AtlasClient {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("Magical Map");
     static long session;
     static List<Sheet> sheets = List.of();
     static List<Sheet> drawSheets = List.of();
@@ -100,6 +101,7 @@ public final class AtlasClient {
 
     static void state(Payloads.State packet) {
         if (packet.reset()) {
+            LOG.debug("atlas session {} -> {}: {} sheets, selection {} dropped", session, packet.session(), packet.sheets().size(), selected);
             clear();
             session = packet.session();
             sheets = packet.sheets();
@@ -112,7 +114,10 @@ public final class AtlasClient {
         revision++;
         for (var id : packet.removed()) {
             places.remove(id);
-            if (id.equals(selected)) selected = null;
+            if (id.equals(selected)) {
+                LOG.debug("atlas selection {} removed by the server", id);
+                selected = null;
+            }
             if (id.equals(tracked)) tracked = null;
         }
         for (var place : packet.upserts()) {

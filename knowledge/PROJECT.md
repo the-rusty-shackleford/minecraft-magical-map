@@ -27,7 +27,8 @@ chunks already in memory, so every destination the player was not standing near 
 refused. It now reads the chunk from disk, accepts it only at full generation status, pins
 it with the vanilla post-teleport ticket and loads it; terrain is still never generated.
 See [D-0004](decisions/D-0004.md). Three GameTests cover in memory, on disk and never
-generated.
+generated. Rusty then asked for landmarks to be teleport targets like villages; they
+resolve for their owner and carry `teleportable` (D-0005), with a GameTest.
 
 Rusty selected an atlas built from real vanilla map sheets, revealed through
 exploration with a meaningful cartography-table workflow. See

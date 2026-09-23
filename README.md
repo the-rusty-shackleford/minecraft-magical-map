@@ -13,7 +13,7 @@ window is under 301 GUI rows tall the list fills the sidebar until you select a 
 whose details then take its place with a **Back to list** button. It also fixes operator
 teleport refusing any destination whose chunk was not already loaded ("Destination terrain
 is unavailable"); a destination saved on disk is loaded for the arrival, and terrain is
-still never generated.
+still never generated. Your own landmarks are now teleport targets for operators.
 
 ![The atlas with two player heads, village, camp and landmark markers](devtools/verification/0.1.0/atlas.png)
 
@@ -84,14 +84,15 @@ Active C.A.M.P. controls and terrain ownership remain entirely with C.A.M.P.
 ## Operator teleport
 
 Operators with permission level **2 or greater** see **Teleport (operator)** for
-owned villages and available camps. Selecting an icon does not teleport you.
+owned villages, available camps and their own landmarks. Selecting an icon does not teleport you.
 
 The server checks permission again on every request, resolves the location's current
 identity, and searches for clear space on solid, non-hazardous ground. Dismount first.
 Missing terrain, removed claims, transforming camps and unsafe arrivals are refused.
 An explicit teleport may load an existing destination chunk; it does not generate a
 new destination or place platforms. Normal location queries do not load chunks.
-Player and personal-landmark markers are navigation destinations, not teleport targets.
+Your own landmarks are teleport targets too, for operators; other players' heads are
+navigation destinations only.
 
 ## Extension protocol
 

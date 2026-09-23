@@ -4,7 +4,8 @@
 list drew over "Choose a destination" (D-0003).
 
 - `./gradlew test`: 12 JUnit tests.
-- `./gradlew runGameTestServer`: 16 real-server GameTests, three new in `ArrivalGameTests`:
+- `./gradlew runGameTestServer`: 17 real-server GameTests. Own landmarks are operator teleport
+  targets and a stranger's landmark does not resolve (D-0005). Three more in `ArrivalGameTests`:
   a loaded destination chunk is available; a chunk generated 50,000 blocks away and saved is
   found on disk at full status and loaded for the arrival; a never-generated chunk is refused
   and stays ungenerated (Rusty's "Destination terrain is unavailable" at their own village,

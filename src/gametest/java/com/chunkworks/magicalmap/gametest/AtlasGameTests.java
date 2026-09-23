@@ -213,7 +213,7 @@ public final class AtlasGameTests {
                         "minecraft:iron_pickaxe",
                         0xaabbcc,
                         Optional.of(owner),
-                        false,
+                        true,
                         "");
         store.put(owner, location);
         var restored =

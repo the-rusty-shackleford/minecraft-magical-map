@@ -53,7 +53,7 @@ public final class Landmarks extends SavedData implements LocationProvider {
                                 entry.getString("Icon"),
                                 entry.getInt("Color"),
                                 Optional.of(owner),
-                                false,
+                                true,
                                 "");
                 var entries =
                         result.players.computeIfAbsent(owner, unused -> new LinkedHashMap<>());
@@ -103,9 +103,11 @@ public final class Landmarks extends SavedData implements LocationProvider {
         return entries == null ? List.of() : List.copyOf(entries.values());
     }
 
+    /** effects: the viewer's own landmark with this id, since 0.2.2 a teleport target. */
     @Override
     public Optional<Location> resolve(Viewer viewer, String id) {
-        return Optional.empty();
+        var entries = players.get(viewer.player());
+        return entries == null ? Optional.empty() : Optional.ofNullable(entries.get(id));
     }
 
     /**
@@ -118,8 +120,14 @@ public final class Landmarks extends SavedData implements LocationProvider {
         var entries = players.computeIfAbsent(owner, unused -> new LinkedHashMap<>());
         if (entries.size() >= LIMIT && !entries.containsKey(location.id()))
             throw new IllegalArgumentException("Landmark limit reached (128)");
-        entries.put(location.id(), location);
+        entries.put(location.id(), teleportable(location));
         setDirty();
+    }
+
+    /** effects: the same landmark marked as an operator teleport target. */
+    private static Location teleportable(Location l) {
+        return l.teleportable() ? l : new Location(l.provider(), l.id(), l.kind(), l.name(), l.dimension(), l.x(), l.y(), l.z(),
+                l.knownHeight(), l.icon(), l.color(), l.owner(), true, l.status());
     }
 
     /** requires: owner and local id; effects: removes only this player's entry; throws: none. */

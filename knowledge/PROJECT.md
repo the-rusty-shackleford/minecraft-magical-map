@@ -15,6 +15,12 @@ selected: the icon's id list is immutable and was asked `indexOf(null)`. The cyc
 pick logic moved to the domain (`Selection`, JUnit-tested with the null case); the canvas
 and screen call it.
 
+Version 0.2.2 (2026-09-22): Rusty's ultrawide at GUI scale 5 is 258 rows tall and the
+sidebar assumed 301 (list from row 128, detail block bottom-anchored 142 up), so the list
+and "Choose a destination" overlapped. Any 1080p window at scale 4 (270 rows) had it too;
+the booth's 360 rows never showed it. See [D-0003](decisions/D-0003.md). The booth now
+also photographs the atlas at 720p scale 3, the 240-row worst case.
+
 Rusty selected an atlas built from real vanilla map sheets, revealed through
 exploration with a meaningful cartography-table workflow. See
 [D-0001](decisions/D-0001.md). Live players, owned villages, the viewer's deployed

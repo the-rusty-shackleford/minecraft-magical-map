@@ -41,11 +41,12 @@ import java.util.function.Consumer;
 public final class AtlasBooth {
     private static final Logger LOG = LoggerFactory.getLogger("Atlas booth");
     private static final BlockPos TABLE = new BlockPos(6, 64, -7);
-    private static final int DONE = 21;
+    private static final int DONE = 24;
     private static int phase, age, total;
     private static volatile boolean ready;
     private static volatile Throwable failure;
     private static ServerPlayer peer;
+    private static ItemStack stashed = ItemStack.EMPTY;
     private static double startX, startZ;
     private static long started = System.currentTimeMillis();
 
@@ -79,7 +80,7 @@ public final class AtlasBooth {
                     }
                 }
                 case 2 -> {
-                    if (age > 15) {
+                    if (mc.screen instanceof CartographyTableScreen || age > 120) {
                         check(
                                 mc.screen instanceof CartographyTableScreen,
                                 "real cartography screen opens");
@@ -268,6 +269,7 @@ public final class AtlasBooth {
                         server(
                                 mc,
                                 p -> {
+                                    stashed = p.getOffhandItem().copy();
                                     p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
                                     p.server.getPlayerList().remove(peer);
                                 });
@@ -311,6 +313,48 @@ public final class AtlasBooth {
                     }
                 }
                 case 20 -> {
+                    if (age == 5) {
+                        mc.options.guiScale().set(3);
+                        mc.resizeDisplay();
+                        server(mc, p -> p.setItemInHand(InteractionHand.OFF_HAND, stashed));
+                    }
+                    if (age == 45 && mc.screen != null) mc.setScreen(null);
+                    if (age > 50) {
+                        check(mc.getWindow().getGuiScaledHeight() == 240, "720p at scale 3 is the 240-row worst case");
+                        check(mc.screen == null, "no screen open before the atlas key");
+                        KeyMapping.click(ClientSetup.OPEN.getKey());
+                        next();
+                    }
+                }
+                case 21 -> {
+                    if (age == 20 && AtlasClient.selected() != null)
+                        mc.screen.mouseClicked(mc.getWindow().getGuiScaledWidth() - 164 + 70, 89, 0);
+                    if (age > 25) {
+                        check(mc.screen instanceof AtlasScreen s && s.stacked(), "short screen stacks the sidebar; screen="
+                                + (mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()) + " height=" + mc.getWindow().getGuiScaledHeight()
+                                + " offhand=" + mc.player.getOffhandItem() + " sheets=" + AtlasClient.sheets().size());
+                        check(AtlasClient.selected() == null, "list mode with nothing selected");
+                        photo(mc, "11-atlas-short-list");
+                        select(mc, "Eastwatch");
+                        next();
+                    }
+                }
+                case 22 -> {
+                    if (age == 12) {
+                        check(AtlasClient.selected() != null, "selection on the short layout");
+                        photo(mc, "12-atlas-short-details");
+                    }
+                    if (age == 20) mc.screen.mouseClicked(mc.getWindow().getGuiScaledWidth() - 164 + 70, 89, 0);
+                    if (age > 28) {
+                        check(AtlasClient.selected() == null, "Back to list deselects");
+                        photo(mc, "13-atlas-short-back");
+                        mc.screen.onClose();
+                        mc.options.guiScale().set(2);
+                        mc.resizeDisplay();
+                        next();
+                    }
+                }
+                case 23 -> {
                     if (age > 10) {
                         LOG.info("atlas booth: COMPLETE");
                         mc.stop();

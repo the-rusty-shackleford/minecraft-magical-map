@@ -4,9 +4,13 @@ A physical atlas for Minecraft 1.21.1 and NeoForge 21.1.248. Join real vanilla m
 chart the world through exploration, and navigate with player heads, owned villages,
 your deployed C.A.M.P. and private landmarks.
 
-**0.2.1.** Install matching versions
+**0.2.2.** Install matching versions
 on client and server. Village Deed, C.A.M.P. and EMI integrations are optional.
 0.2.1 fixes a client crash when clicking a map icon before any location was selected.
+0.2.2 fixes the sidebar on short screens (1080p at GUI scale 4, ultrawides at scale 5):
+the location list and the destination panel no longer draw over each other. When the
+window is under 301 GUI rows tall the list fills the sidebar until you select a location,
+whose details then take its place with a **Back to list** button.
 
 ![The atlas with two player heads, village, camp and landmark markers](devtools/verification/0.1.0/atlas.png)
 

@@ -6,7 +6,12 @@ version = mod_version
 group = 'com.chunkworks.magicalmap'
 base { archivesName = 'magicalmap' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-repositories { mavenCentral() }
+repositories {
+    mavenCentral()
+    // EMI (recipe viewer): API for the optional plugin, full jar for the booth only.
+    maven { url = 'https://maven.terraformersmc.com/releases/'; content { includeGroup 'dev.emi' } }
+}
+def emi = 'dev.emi:emi-neoforge:1.1.24+1.21.1'
 sourceSets { domain; gametest }
 def prepare = tasks.register('prepareVerification') {
     doLast {
@@ -108,6 +113,9 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
     // Optional, actual upstream jars for integration verification. Never embedded.
     gametestRuntimeOnly fileTree('devtools/integration') { include '*.jar' }
+    compileOnly "${emi}:api"
+    gametestCompileOnly "${emi}:api"
+    gametestRuntimeOnly emi
 }
 tasks.named('test', Test) { useJUnitPlatform() }
 jar { from sourceSets.domain.output }

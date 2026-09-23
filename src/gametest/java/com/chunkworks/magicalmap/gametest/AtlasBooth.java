@@ -8,6 +8,9 @@ import com.chunkworks.magicalmap.client.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.inventory.CartographyTableScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import dev.emi.emi.api.EmiApi;
+import dev.emi.emi.api.stack.EmiStack;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -38,6 +41,7 @@ import java.util.function.Consumer;
 public final class AtlasBooth {
     private static final Logger LOG = LoggerFactory.getLogger("Atlas booth");
     private static final BlockPos TABLE = new BlockPos(6, 64, -7);
+    private static final int DONE = 21;
     private static int phase, age, total;
     private static volatile boolean ready;
     private static volatile Throwable failure;
@@ -47,7 +51,7 @@ public final class AtlasBooth {
 
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event) {
-        if (!Boolean.getBoolean("magicalmap.booth") || phase >= 18) return;
+        if (!Boolean.getBoolean("magicalmap.booth") || phase >= DONE) return;
         var mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
         if (mc.screen instanceof PauseScreen) mc.setScreen(null);
@@ -276,9 +280,41 @@ public final class AtlasBooth {
                                 AtlasClient.sheets().isEmpty()
                                         && AtlasClient.loadedSheetCount() == 0,
                                 "unequipping clears authorized session and closes textures");
+                        server(mc, p -> p.setGameMode(GameType.CREATIVE));
+                        next();
+                    }
+                }
+                case 18 -> {
+                    if (age == 20) {
+                        var selected = CreativeModeInventoryScreen.class.getDeclaredField("selectedTab");
+                        selected.setAccessible(true);
+                        selected.set(null, MagicalMap.TAB.get());
+                        mc.setScreen(new CreativeModeInventoryScreen(mc.player, mc.player.connection.enabledFeatures(), false));
+                    }
+                    if (age > 30) {
+                        check(mc.screen instanceof CreativeModeInventoryScreen
+                                && mc.player.containerMenu.getSlot(0).getItem().is(MagicalMap.ATLAS.get()),
+                                "Magical Map creative tab opens with the atlas in its first slot");
+                        photo(mc, "09-creative-tab");
+                        mc.screen.onClose();
+                        next();
+                    }
+                }
+                case 19 -> {
+                    if (age == 10) EmiApi.displayRecipes(EmiStack.of(MagicalMap.ATLAS.get()));
+                    if (age > 25) {
+                        check(mc.screen != null && mc.screen.getClass().getName().startsWith("dev.emi"),
+                                "EMI opens the atlas's recipe screen");
+                        photo(mc, "10-emi-cartography");
+                        mc.screen.onClose();
+                        next();
+                    }
+                }
+                case 20 -> {
+                    if (age > 10) {
                         LOG.info("atlas booth: COMPLETE");
                         mc.stop();
-                        phase = 18;
+                        phase = DONE;
                     }
                 }
                 default -> {}
@@ -287,7 +323,7 @@ public final class AtlasBooth {
             LOG.error("atlas booth: FAIL phase " + phase, error);
             mc.options.keyUp.setDown(false);
             mc.stop();
-            phase = 18;
+            phase = DONE;
         }
     }
 

@@ -4,8 +4,8 @@ A physical atlas for Minecraft 1.21.1 and NeoForge 21.1.248. Join real vanilla m
 chart the world through exploration, and navigate with player heads, owned villages,
 your deployed C.A.M.P. and private landmarks.
 
-**0.1.0.** Install matching versions
-on client and server. Village Deed and C.A.M.P. integrations are optional.
+**0.2.0.** Install matching versions
+on client and server. Village Deed, C.A.M.P. and EMI integrations are optional.
 
 ![The atlas with two player heads, village, camp and landmark markers](devtools/verification/0.1.0/atlas.png)
 
@@ -21,6 +21,12 @@ Use a **cartography table**:
 | Filled map | Book | Magical Atlas containing that map |
 | Magical Atlas | Another filled map | Bind that sheet into the atlas |
 | Magical Atlas | Shears | Recover the last sheet; the remaining atlas stays in the first slot |
+
+The atlas sits in its own **Magical Map** creative tab beside the vanilla tabs, and in
+Tools & Utilities. With **EMI** installed, the three table operations above appear under a
+**Cartography Table** category: look up the atlas's recipes or uses as with any item. The
+table's behaviour is a menu extension, not a crafting recipe, which is why a recipe viewer
+needs this plugin to show it.
 
 An atlas holds up to **64 distinct map IDs**. Duplicate copies of the same map are
 refused without consuming either input. Shears lose one durability per extraction

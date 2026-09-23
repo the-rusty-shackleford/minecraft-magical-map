@@ -4,6 +4,12 @@ Minecraft 1.21.1 / NeoForge 21.1.248 / Java 21. New mod, `magicalmap`, in
 `minecraft-magical-map`. Version 0.1.0 is the first release. Rusty approved the
 interactive test and authorized release on 2026-09-20.
 
+Version 0.2.0 (2026-09-22, Rusty's request and release authorization in one): the
+atlas gets the mod's own creative tab, and an EMI plugin shows the three
+cartography-table operations under a "Cartography Table" category. See
+[D-0002](decisions/D-0002.md). The operations are data in the domain
+(`AtlasRecipes`, JUnit-tested); the plugin only loads when EMI is present.
+
 Rusty selected an atlas built from real vanilla map sheets, revealed through
 exploration with a meaningful cartography-table workflow. See
 [D-0001](decisions/D-0001.md). Live players, owned villages, the viewer's deployed

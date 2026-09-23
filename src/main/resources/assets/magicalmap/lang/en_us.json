@@ -1,5 +1,7 @@
 {
   "item.magicalmap.atlas": "Magical Atlas",
+  "itemGroup.magicalmap": "Magical Map",
+  "emi.category.magicalmap.cartography": "Cartography Table",
   "key.categories.magicalmap": "Magical Map",
   "key.magicalmap.open": "Open atlas",
   "key.magicalmap.travel": "Toggle travel map"

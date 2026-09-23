@@ -22,5 +22,5 @@ list drew over "Choose a destination" (D-0003).
   rows is unchanged, as its earlier photos show.
 - The booth's cartography step now waits for the screen instead of a fixed 15 ticks; it
   had flaked twice under CPU contention.
-- `./gradlew build -PskipBooth`: green; jar `magicalmap-0.2.2.jar` sha1 `bc877cbb02e8ddddc5db816d61a0c922c9ec290c`. Built
+- `./gradlew build -PskipBooth`: green; jar `magicalmap-0.2.2.jar` sha1 `79b0263d3116fc8835fcc95e748eb8978eb78d9e`. Built
   and committed; release waits on Rusty's go.

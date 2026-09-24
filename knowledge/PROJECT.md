@@ -88,7 +88,13 @@ own too (D-0007). The integration GameTest and the booth's new bar photo (`15-az
 the arrival the booth faces west, where the landmarks, the ford, the camp and the peer lie)
 verify it. The booth's phase 1 and 2 now log the client's position, screen and the server's
 menu state, for the cartography-screen flake (two of the day's first three runs never saw the
-screen within the 20 s cap; the next runs, logged the same way, all did).
+screen within the 20 s cap; the next runs, logged the same way, all did). Later the same day
+Azimuth's bar was restyled before its first release (Azimuth D-0003: outlined bar, badges,
+framed heads, dots under sprites, chevrons, far players as dots); the GameTests and the booth
+were rerun against the restyled jar and the bar photo replaced, the jar itself unchanged. That
+rerun found Azimuth drawing the nearest marker underneath (the village bell underfoot hidden
+by the ford's boat), fixed in Azimuth. Places clustered within 20° of each other overlap on a
+102-pixel bar; the nearest is on top.
 
 0.2.4 (2026-09-24): Village Deed 2.0.0 (Chunkworks, `com.chunkworks.villagedeed`) replaced
 nfx's 1.0.0 in pack 1.61.0 and the reflective bridge in `integration/OptionalLocations`

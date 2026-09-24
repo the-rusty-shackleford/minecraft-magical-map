@@ -84,7 +84,7 @@ per player. They survive dropping or replacing an atlas. Another player using yo
 atlas receives its map sheets, not your private landmarks.
 
 Connected players appear as their skin heads. Village Deed's owned villages are
-public markers anchored to their recorded start chunk. Only your own C.A.M.P.
+public markers at the centre each deed records. Only your own C.A.M.P.
 appears; its owner ledger keeps it visible
 when its chunk is unloaded. It disappears when packed and follows redeployment.
 Active C.A.M.P. controls and terrain ownership remain entirely with C.A.M.P.
@@ -118,7 +118,7 @@ in separate adapters under `src/main`. Protocol version 1 requires matching peer
 Sessions are tied to the actual held atlas and its contents. Unequipping, replacing,
 disconnecting or stopping the server clears their authorization and texture caches.
 
-Village Deed 1.0.0 and C.A.M.P. 0.2.0 currently have no published API artifact used
+Village Deed 2.0.0 and C.A.M.P. 0.2.0 currently have no published API artifact used
 by this project. Their bridges validate the installed Java signatures once at server
 startup, using reflection confined to `integration/OptionalLocations.java`. Neither
 mod is embedded. Incompatible signatures disable the affected bridge with a log
@@ -167,7 +167,7 @@ JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew test runGameTestServer ja
 
 The plain JUnit tests have no Minecraft dependency. Real-server GameTests exercise
 actual cartography menu clicks, vanilla map operations, item components, private
-persistence, authorization and safe arrival. Put actual Village Deed 1.0.0, Thief
+persistence, authorization and safe arrival. Put actual Village Deed 2.0.0, Thief
 1.2.4 and C.A.M.P. 0.2.0 jars in ignored `devtools/integration/` to run the bridge
 tests. Their absence is explicitly reported as missing integration coverage.
 

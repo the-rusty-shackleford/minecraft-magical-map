@@ -8,7 +8,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
 import net.neoforged.fml.ModList;
 
 import org.slf4j.LoggerFactory;
@@ -69,18 +68,23 @@ public final class OptionalLocations {
         }
     }
 
+    /** Village Deed 2.0.0 (Chunkworks): a claim carries a village id, a name, a deed with its
+     * owner, and the centre the purchase recorded. */
     private static final class Villages extends Bridge {
-        private final Method get, all, villageId, name, buyer;
+        private final Method get, all, id, name, centre, deed, owner;
 
         Villages(MinecraftServer server) throws ReflectiveOperationException {
             super(server);
-            var type = Class.forName("com.nfx.villagedeed.village.VillageClaims");
-            var claim = Class.forName("com.nfx.villagedeed.village.VillageClaims$Claim");
+            var type = Class.forName("com.chunkworks.villagedeed.Claims");
+            var claim = Class.forName("com.chunkworks.villagedeed.Claims$Claim");
+            var deedType = Class.forName("com.chunkworks.villagedeed.domain.Deed");
             get = type.getMethod("get", ServerLevel.class);
             all = type.getMethod("all");
-            villageId = claim.getMethod("villageId");
-            name = claim.getMethod("villageName");
-            buyer = claim.getMethod("buyer");
+            id = claim.getMethod("id");
+            name = claim.getMethod("name");
+            centre = claim.getMethod("centre");
+            deed = claim.getMethod("deed");
+            owner = deedType.getMethod("owner");
         }
 
         @Override
@@ -95,23 +99,22 @@ public final class OptionalLocations {
                 var claims = (Collection<?>) call(all, call(get, null, level));
                 for (var claim : claims) {
                     if (result.size() == 256) break;
-                    long id = (Long) call(villageId, claim);
-                    var chunk = new ChunkPos(id);
+                    var at = (BlockPos) call(centre, claim);
                     var dimension = level.dimension().location().toString();
                     result.add(
                             new Location(
                                     id(),
-                                    dimension + "/" + id,
+                                    dimension + "/" + call(id, claim),
                                     "villagedeed:village",
                                     (String) call(name, claim),
                                     dimension,
-                                    chunk.getMiddleBlockX(),
-                                    0,
-                                    chunk.getMiddleBlockZ(),
+                                    at.getX() + .5,
+                                    at.getY(),
+                                    at.getZ() + .5,
                                     false,
                                     "minecraft:bell",
                                     0xe5b85b,
-                                    Optional.of((UUID) call(buyer, claim)),
+                                    Optional.of((UUID) call(owner, call(deed, claim))),
                                     viewer.operator(),
                                     "Owned village"));
                 }

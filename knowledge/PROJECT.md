@@ -75,6 +75,17 @@ an active camp, village teleport and the field guide; the simulated player's
 connection remained active beyond 40 seconds. The starting travel view was
 visually inspected. Rusty subsequently approved the hands-on result.
 
+0.2.4 (2026-09-24): Village Deed 2.0.0 (Chunkworks, `com.chunkworks.villagedeed`) replaced
+nfx's 1.0.0 in pack 1.61.0 and the reflective bridge in `integration/OptionalLocations`
+found no `com.nfx.villagedeed.village.VillageClaims`; the server logged "Atlas integration
+unavailable: Village Deed" and atlases lost owned villages (none existed yet). The bridge
+now binds to `Claims`, `Claims$Claim` (`id`, `name`, `centre`, `deed`) and `Deed.owner`, and
+places the marker at the centre the deed records instead of the start chunk's middle at
+y 0. The integration GameTest and the booth's village fixture create a real 2.0.0 claim
+(`VillageId("structure", <chunk>)`, `Deed.of(owner)`, a centre, a price). The jar in
+`devtools/integration/` is 2.0.0. Village Deed's own `api` package is the way forward for a
+non-reflective binding.
+
 Rusty's first interactive test reported severe stutter: its launcher had inherited
 the automated booth's software-rendering overrides. The interactive launcher now
 uses the desktop GPU, rejects software OpenGL, and defaults to a 120 FPS cap.

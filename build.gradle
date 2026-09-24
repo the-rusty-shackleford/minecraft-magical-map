@@ -45,7 +45,7 @@ def playtestWorld = tasks.register('preparePlaytestWorld', Sync) {
         if (!file('run/world/level.dat').isFile()) {
             throw new GradleException('Create the disposable template first: ./gradlew runGameTestServer')
         }
-        ['mobilecamp-0.2.0.jar', 'villagedeed-1.0.0.jar', 'thief-neoforge-1.21.1-1.2.4.jar'].each { name ->
+        ['mobilecamp-0.2.0.jar', 'villagedeed-2.0.0.jar', 'thief-neoforge-1.21.1-1.2.4.jar'].each { name ->
             if (!file("devtools/integration/${name}").isFile()) throw new GradleException("Playtest requires devtools/integration/${name}")
         }
     }

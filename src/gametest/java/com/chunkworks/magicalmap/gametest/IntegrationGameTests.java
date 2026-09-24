@@ -52,29 +52,51 @@ public final class IntegrationGameTests {
                         .findFirst()
                         .orElseThrow();
         h.assertTrue(
-                marker.x() == new ChunkPos(pos).getMiddleBlockX() && marker.owner().isPresent(),
-                "real claim geometry and buyer exposed");
+                marker.x() == new ChunkPos(pos).getMiddleBlockX() + .5 && marker.owner().isPresent(),
+                "real claim centre and owner exposed");
         h.assertTrue(
                 provider.resolve(
                                 new Viewer(viewer.player(), viewer.dimension(), false), marker.id())
                         .isEmpty(),
                 "nonoperator cannot resolve teleport");
-        var claims = Class.forName("com.nfx.villagedeed.village.VillageClaims");
-        claims.getMethod("revoke", long.class)
-                .invoke(claims.getMethod("get", ServerLevel.class).invoke(null, level), id);
+        var claims = Class.forName("com.chunkworks.villagedeed.Claims");
+        var villageId = Class.forName("com.chunkworks.villagedeed.api.VillageId");
+        claims.getMethod("revoke", villageId)
+                .invoke(claims.getMethod("get", ServerLevel.class).invoke(null, level), villageKey(id));
         h.assertTrue(
                 provider.resolve(viewer, marker.id()).isEmpty(),
                 "revocation invalidates stale marker");
         h.succeed();
     }
 
-    /** Creates a real Village Deed record; shared by server tests and the client booth. */
+    /** The Village Deed 2.0.0 id of the structure village whose start chunk is {@code id}. */
+    private static Object villageKey(long id) throws Exception {
+        return Class.forName("com.chunkworks.villagedeed.api.VillageId")
+                .getConstructor(String.class, String.class)
+                .newInstance("structure", Long.toString(id));
+    }
+
+    /**
+     * Creates a real Village Deed 2.0.0 claim on the structure village whose start chunk is
+     * {@code id}, centred on that chunk; shared by server tests and the client booth.
+     */
     public static void claim(ServerLevel level, long id, String name, UUID owner) throws Exception {
-        var claims = Class.forName("com.nfx.villagedeed.village.VillageClaims");
-        var claim = Class.forName("com.nfx.villagedeed.village.VillageClaims$Claim");
+        var claims = Class.forName("com.chunkworks.villagedeed.Claims");
+        var claim = Class.forName("com.chunkworks.villagedeed.Claims$Claim");
+        var villageId = Class.forName("com.chunkworks.villagedeed.api.VillageId");
+        var deed = Class.forName("com.chunkworks.villagedeed.domain.Deed");
+        var chunk = new ChunkPos(id);
         var value =
-                claim.getConstructor(long.class, String.class, UUID.class, String.class, long.class)
-                        .newInstance(id, name, owner, "Cartographer", level.getGameTime());
+                claim.getConstructor(
+                                villageId, String.class, deed, Map.class, BlockPos.class, int.class, long.class)
+                        .newInstance(
+                                villageKey(id),
+                                name,
+                                deed.getMethod("of", UUID.class).invoke(null, owner),
+                                Map.of(owner, "Cartographer"),
+                                new BlockPos(chunk.getMiddleBlockX(), 0, chunk.getMiddleBlockZ()),
+                                45,
+                                level.getGameTime());
         claims.getMethod("claim", claim)
                 .invoke(claims.getMethod("get", ServerLevel.class).invoke(null, level), value);
     }

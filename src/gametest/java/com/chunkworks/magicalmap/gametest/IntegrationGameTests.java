@@ -101,6 +101,40 @@ public final class IntegrationGameTests {
                 .invoke(claims.getMethod("get", ServerLevel.class).invoke(null, level), value);
     }
 
+    @GameTest(template = "arena")
+    public void atlasBearingsFollowAzimuthsProtocol(GameTestHelper h) {
+        if (!ModList.get().isLoaded("azimuth")) {
+            h.succeed();
+            System.out.println("INTEGRATION NOT RUN: Azimuth absent");
+            return;
+        }
+        var player = h.makeMockServerPlayerInLevel();
+        var anchor = h.absolutePos(new BlockPos(10, 2, 10));
+        player.moveTo(Vec3.atBottomCenterOf(anchor));
+        var dimension = h.getLevel().dimension().location().toString();
+        TestDestinations.PLACES.put("near", survey("near", dimension, anchor.getX() + 100, anchor.getY(), anchor.getZ()));
+        TestDestinations.PLACES.put("far", survey("far", dimension, anchor.getX() + 400, anchor.getY(), anchor.getZ()));
+        var viewer = new com.chunkworks.azimuth.api.AzimuthViewer(player.getUUID(), dimension, player.getX(), player.getY(), player.getZ());
+        var bridge = new com.chunkworks.magicalmap.integration.azimuth.AtlasBearings();
+        h.assertTrue(bridge.bearings(viewer, 256).isEmpty(), "without an atlas the bar gets nothing from the atlas");
+        player.getInventory().add(new ItemStack(MagicalMap.ATLAS.get()));
+        var bearings = bridge.bearings(viewer, 256);
+        var ids = bearings.stream().map(b -> b.id()).toList();
+        h.assertTrue(ids.contains("atlas_test:destinations/near"), "the destination within range is on the bar: " + ids);
+        h.assertTrue(!ids.contains("atlas_test:destinations/far"), "the one beyond range is not: " + ids);
+        h.assertTrue(ids.stream().noneMatch(id -> id.startsWith("magicalmap:players/")), "players are Azimuth's own, never relayed: " + ids);
+        h.assertTrue(bearings.stream().allMatch(b -> b.provider().equals("magicalmap:atlas")), "every bearing is the atlas's");
+        var near = bearings.stream().filter(b -> b.id().equals("atlas_test:destinations/near")).findFirst().orElseThrow();
+        h.assertTrue(near.icon().equals("minecraft:beacon") && near.color() == 0xabcdef && near.x() == anchor.getX() + 100, "icon, colour and position carried over");
+        TestDestinations.PLACES.clear();
+        player.server.getPlayerList().remove(player);
+        h.succeed();
+    }
+
+    private static Location survey(String id, String dimension, double x, double y, double z) {
+        return new Location("atlas_test:destinations", id, "atlas_test:survey", "Survey post", dimension, x, y, z, true, "minecraft:beacon", 0xabcdef, Optional.empty(), false, "");
+    }
+
     @GameTest(template = "arena", timeoutTicks = 440)
     public void campMarkerFollowsRealDeploymentAndPacking(GameTestHelper h) {
         if (!ModList.get().isLoaded("mobilecamp")) {

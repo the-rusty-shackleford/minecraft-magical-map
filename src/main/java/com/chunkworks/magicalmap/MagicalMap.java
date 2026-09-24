@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.*;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -35,5 +36,8 @@ public final class MagicalMap {
                         event.accept(ATLAS);
                 });
         NeoForge.EVENT_BUS.register(AtlasServer.class);
+        // The atlas is an Azimuth provider when Azimuth is present (D-0007); the bridge class is
+        // the only one naming Azimuth, and it is loaded only past this check.
+        if (ModList.get().isLoaded("azimuth")) com.chunkworks.magicalmap.integration.azimuth.AzimuthBridge.register();
     }
 }

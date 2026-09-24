@@ -71,6 +71,8 @@ public final class AtlasBooth {
                 case 1 -> {
                     if (ready && age > 60) {
                         ready = false;
+                        LOG.info("atlas booth: phase 1 using table from {} screen={} block={}",
+                                mc.player.position(), mc.screen, mc.level.getBlockState(TABLE));
                         mc.gameMode.useItemOn(
                                 mc.player,
                                 InteractionHand.MAIN_HAND,
@@ -81,10 +83,16 @@ public final class AtlasBooth {
                 }
                 case 2 -> {
                     // Up to 20 s: a server 70 ticks behind under back-to-back runs missed 6 s.
+                    if (age == 200 || age == 380) {
+                        LOG.info("atlas booth: phase 2 age {} client screen={} at {} menu={} paused={}",
+                                age, mc.screen, mc.player.position(), mc.player.containerMenu.getClass().getSimpleName(), mc.isPaused());
+                        server(mc, p -> LOG.info("atlas booth: phase 2 server tick={} player at {} menu={} gameMode={}",
+                                p.server.getTickCount(), p.position(), p.containerMenu.getClass().getSimpleName(), p.gameMode.getGameModeForPlayer()));
+                    }
                     if (mc.screen instanceof CartographyTableScreen || age > 400) {
                         check(
                                 mc.screen instanceof CartographyTableScreen,
-                                "real cartography screen opens");
+                                "real cartography screen opens (screen: " + mc.screen + ")");
                         click(mc, 3, ClickType.QUICK_MOVE);
                         click(mc, 4, ClickType.QUICK_MOVE);
                         next();
@@ -278,8 +286,26 @@ public final class AtlasBooth {
                                 "operator teleport packet reaches a safe village destination");
                         mc.screen.onClose();
                     }
-                    if (age > 35) {
+                    boolean azimuth = net.neoforged.fml.ModList.get().isLoaded("azimuth");
+                    if (age == 36) {
                         photo(mc, "08-arrival");
+                        // With Azimuth loaded the bar above shows what the atlas in the offhand knows
+                        // (D-0007). Face west, where the ford, the camp, the mine, the booth waypoint
+                        // and the Surveyor lie 90 to 170 blocks off; the village bell is underfoot.
+                        if (azimuth) {
+                            mc.player.setYRot(90);
+                            mc.player.yRotO = 90;
+                        }
+                    }
+                    if (age > (azimuth ? 60 : 36)) {
+                        if (azimuth) {
+                            var bearings = com.chunkworks.azimuth.Bearings.locations().orElseThrow(() -> new IllegalStateException("Azimuth sent no places"));
+                            var ids = bearings.entries().stream().map(e -> e.provider() + "/" + e.id()).toList();
+                            check(ids.stream().anyMatch(id -> id.startsWith("magicalmap:atlas/villagedeed:villages/")), "the village the atlas knows is on the bar: " + ids);
+                            check(ids.stream().anyMatch(id -> id.startsWith("magicalmap:atlas/magicalmap:landmarks/")), "the atlas's landmarks are on the bar: " + ids);
+                            check(ids.stream().noneMatch(id -> id.contains("magicalmap:players")), "players reach the bar through Azimuth, not the atlas: " + ids);
+                            photo(mc, "15-azimuth-bar");
+                        }
                         server(
                                 mc,
                                 p -> {

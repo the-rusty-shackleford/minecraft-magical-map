@@ -8,10 +8,14 @@ base { archivesName = 'magicalmap' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 repositories {
     mavenCentral()
+    // Azimuth (the bar the atlas feeds, D-0007) is a sibling repo published to mavenLocal with
+    // `./gradlew publishToMavenLocal`, as Ranged Weapons is shared with Armed Pillagers.
+    mavenLocal()
     // EMI (recipe viewer): API for the optional plugin, full jar for the booth only.
     maven { url = 'https://maven.terraformersmc.com/releases/'; content { includeGroup 'dev.emi' } }
 }
 def emi = 'dev.emi:emi-neoforge:1.1.24+1.21.1'
+def azimuth = 'com.chunkworks.azimuth:azimuth:1.0.0'
 sourceSets { domain; gametest }
 def prepare = tasks.register('prepareVerification') {
     doLast {
@@ -116,6 +120,11 @@ dependencies {
     compileOnly "${emi}:api"
     gametestCompileOnly "${emi}:api"
     gametestRuntimeOnly emi
+    // The atlas implements Azimuth's protocol; compile only, optional at runtime, and loaded on
+    // the gametest server and in the booth so the bridge is exercised.
+    compileOnly azimuth
+    gametestCompileOnly azimuth
+    gametestRuntimeOnly azimuth
 }
 tasks.named('test', Test) { useJUnitPlatform() }
 jar { from sourceSets.domain.output }

@@ -89,6 +89,19 @@ appears; its owner ledger keeps it visible
 when its chunk is unloaded. It disappears when packed and follows redeployment.
 Active C.A.M.P. controls and terrain ownership remain entirely with C.A.M.P.
 
+## On the Azimuth bar
+
+With [Azimuth](https://github.com/the-rusty-shackleford/minecraft-azimuth) installed, the atlas
+puts what it knows on the bar across the top of the screen **while an atlas is in your
+inventory**: bought villages, your own C.A.M.P. and your own landmarks, within Azimuth's range
+(256 blocks by default) and fading in over its last stretch. Players reach the bar through
+Azimuth itself, never through the atlas. Without an atlas in your pockets the bar shows players
+and compass points only. The atlas is an `AzimuthProvider` (`magicalmap:atlas`) relaying every
+registered location provider but the players'; each bearing's id is the provider's id and local
+id joined, so a place keeps one identity across atlas and bar. A provider that fails drops from
+the bar and the atlas alike, on its own, logged once ("Atlas provider failed"); the others stay.
+Azimuth is optional: without it nothing changes.
+
 ## Operator teleport
 
 Operators with permission level **2 or greater** see **Teleport (operator)** for

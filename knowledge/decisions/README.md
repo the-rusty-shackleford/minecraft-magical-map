@@ -10,3 +10,4 @@ Rationales are append-only; supersede with a new numbered entry.
 | [D-0004](D-0004.md) | Accepted | Arrival loads a saved destination chunk from disk, never generates |
 | [D-0005](D-0005.md) | Accepted | Own landmarks are operator teleport targets |
 | [D-0006](D-0006.md) | Accepted | A sheet's identity is its cell, not its map id |
+| [D-0007](D-0007.md) | Accepted | The atlas implements Azimuth's location protocol, only while carried |

@@ -75,6 +75,21 @@ an active camp, village teleport and the field guide; the simulated player's
 connection remained active beyond 40 seconds. The starting travel view was
 visually inspected. Rusty subsequently approved the hands-on result.
 
+0.3.0 (2026-09-24): the atlas implements Azimuth's AzimuthLocation protocol (D-0007):
+`integration/azimuth/AtlasBearings` relays every registered provider but the players' to the
+bar for viewers carrying an atlas, in their dimension within Azimuth's range, under the id
+`magicalmap:atlas` with `<provider>/<id>` as the place's id; `AzimuthBridge` registers it only
+when `ModList` finds Azimuth, so the entry never names an Azimuth class. Azimuth is compiled
+against from mavenLocal (`com.chunkworks.azimuth:azimuth:1.0.0`, `./gradlew publishToMavenLocal`
+in its repo) and optional at runtime; the gametest server and the booth load it. `AtlasServer`
+now exposes `providers()`, `server()` and `places(provider, viewer)`, the contract check and
+failure isolation the atlas always had, factored out so the bar drops a failing provider on its
+own too (D-0007). The integration GameTest and the booth's new bar photo (`15-azimuth-bar`: after
+the arrival the booth faces west, where the landmarks, the ford, the camp and the peer lie)
+verify it. The booth's phase 1 and 2 now log the client's position, screen and the server's
+menu state, for the cartography-screen flake (two of the day's first three runs never saw the
+screen within the 20 s cap; the next runs, logged the same way, all did).
+
 0.2.4 (2026-09-24): Village Deed 2.0.0 (Chunkworks, `com.chunkworks.villagedeed`) replaced
 nfx's 1.0.0 in pack 1.61.0 and the reflective bridge in `integration/OptionalLocations`
 found no `com.nfx.villagedeed.village.VillageClaims`; the server logged "Atlas integration

@@ -8,6 +8,7 @@ import com.chunkworks.magicalmap.integration.*;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.*;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -54,10 +55,13 @@ public final class AtlasServer {
         }
     }
 
+    private static volatile MinecraftServer server;
+
     @SubscribeEvent
     public static void started(ServerStartedEvent event) {
         SESSIONS.clear();
         FAILED_PROVIDERS.clear();
+        server = event.getServer();
         var registration = new RegisterLocationProvidersEvent(event.getServer());
         registration.register(new PlayerLocations(event.getServer()));
         registration.register(Landmarks.get(event.getServer()));
@@ -71,6 +75,17 @@ public final class AtlasServer {
         SESSIONS.clear();
         providers = Map.of();
         FAILED_PROVIDERS.clear();
+        if (server == event.getServer()) server = null;
+    }
+
+    /** requires: none; effects: the providers registered for the running server, empty between servers. */
+    public static Map<String, LocationProvider> providers() {
+        return providers;
+    }
+
+    /** requires: none; effects: the running server, or null between servers. */
+    public static MinecraftServer server() {
+        return server;
     }
 
     /**
@@ -187,27 +202,40 @@ public final class AtlasServer {
         }
     }
 
+    /**
+     * requires: a registered provider; effects: its snapshot for the viewer when it keeps the
+     * contract (at most 256 places, each under its own identity, no key twice), otherwise none,
+     * the failure logged once per provider and server so the atlas and the Azimuth bar drop the
+     * same provider for the same reason.
+     */
+    public static List<Location> places(LocationProvider provider, Viewer viewer) {
+        try {
+            var places = provider.snapshot(viewer);
+            if (places.size() > 256)
+                throw new IllegalArgumentException("Provider exceeds 256 places");
+            var keys = new HashSet<Location.Key>();
+            for (var place : places) {
+                if (!place.provider().equals(provider.id()))
+                    throw new IllegalArgumentException("Provider returned foreign identity");
+                if (!keys.add(place.key()))
+                    throw new IllegalArgumentException("Duplicate location ID");
+            }
+            return places;
+        } catch (RuntimeException failure) {
+            if (FAILED_PROVIDERS.add(provider.id()))
+                LOG.error("Atlas provider failed: " + provider.id(), failure);
+            return List.of();
+        }
+    }
+
     private static void syncLocations(ServerPlayer player, Session session) {
         var current = new LinkedHashMap<Location.Key, Location>();
         var viewer = viewer(player);
-        for (var provider : providers.values()) {
-            try {
-                var places = provider.snapshot(viewer);
-                if (places.size() > 256)
-                    throw new IllegalArgumentException("Provider exceeds 256 places");
-                for (var place : places) {
-                    if (!place.provider().equals(provider.id()))
-                        throw new IllegalArgumentException("Provider returned foreign identity");
-                    if (current.size() >= 768) break;
-                    if (current.putIfAbsent(place.key(), place) != null)
-                        throw new IllegalArgumentException("Duplicate location ID");
-                }
-            } catch (RuntimeException failure) {
-                current.entrySet().removeIf(e -> e.getKey().provider().equals(provider.id()));
-                if (FAILED_PROVIDERS.add(provider.id()))
-                    LOG.error("Atlas provider failed: " + provider.id(), failure);
+        for (var provider : providers.values())
+            for (var place : places(provider, viewer)) {
+                if (current.size() >= 768) break;
+                current.put(place.key(), place);
             }
-        }
         var changes =
                 current.values().stream()
                         .filter(p -> !p.equals(session.locations.get(p.key())))

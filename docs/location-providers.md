@@ -87,6 +87,17 @@ No persistence format for third-party state is imposed. Your mod remains respons
 for its own saves, stable identity, lifecycle and migrations. Personal landmarks
 are owned by Magical Map; vanilla map pixels remain owned by Minecraft.
 
+## Your provider on the Azimuth bar
+
+When Azimuth is installed, Magical Map relays every registered provider but its own players'
+to Azimuth's bar (`integration/azimuth/AtlasBearings`, provider `magicalmap:atlas`) for viewers
+who carry an atlas, within Azimuth's range and in the viewer's dimension only. Your `snapshot`
+is what is relayed, so its visibility rules hold on the bar; your `icon` is drawn as the item's
+sprite over a dot in your `color`. The same isolation applies: a snapshot that throws or breaks
+the contract drops your places from the bar and the atlas together, logged once, and the other
+providers stay. A provider that should not appear on the bar has no switch yet; ask. A mod that
+wants places on the bar without an atlas implements Azimuth's protocol directly instead.
+
 ## Required contract partitions
 
 Test present/moved/removed places; owner/stranger/operator visibility; available and

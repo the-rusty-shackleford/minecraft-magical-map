@@ -94,7 +94,9 @@ framed heads, dots under sprites, chevrons, far players as dots); the GameTests 
 were rerun against the restyled jar and the bar photo replaced, the jar itself unchanged. That
 rerun found Azimuth drawing the nearest marker underneath (the village bell underfoot hidden
 by the ford's boat), fixed in Azimuth. Places clustered within 20° of each other overlap on a
-102-pixel bar; the nearest is on top.
+102-pixel bar; the nearest is on top. **Released 2026-09-24** (tag v0.3.0) with Azimuth 1.0.0
+as pack 1.62.0 on Rusty's "Release and deploy"; deployed the same hour, no "Atlas integration
+unavailable" line.
 
 0.2.4 (2026-09-24): Village Deed 2.0.0 (Chunkworks, `com.chunkworks.villagedeed`) replaced
 nfx's 1.0.0 in pack 1.61.0 and the reflective bridge in `integration/OptionalLocations`

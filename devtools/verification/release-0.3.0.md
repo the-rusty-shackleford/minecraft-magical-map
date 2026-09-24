@@ -47,6 +47,8 @@ the two reruns for the restyled bar), logged the same way, all opened the screen
 seconds of the peer's join, so the cause is not pinned; the next failure will carry the
 evidence.
 
-Not verified: the bar on the live server (Azimuth is unreleased; both ship together as pack
-1.62.0 on Rusty's go, with the Locator Bar's override jar dropped). The jar is unchanged by the
-restyle: the look is Azimuth's, and only the photos here changed.
+Released 2026-09-24 as tag v0.3.0 with Azimuth 1.0.0 in pack 1.62.0 (the Locator Bar's
+override jar dropped); the GitHub asset and the server's copy match the jar above by sha1, and
+the server's first start logged no "Atlas integration unavailable" line. Not verified: anyone's
+atlas places on the bar on a live client. The jar is unchanged by the restyle: the look is
+Azimuth's, and only the photos here changed.

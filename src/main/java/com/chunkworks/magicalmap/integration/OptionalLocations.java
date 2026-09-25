@@ -71,7 +71,7 @@ public final class OptionalLocations {
     /** Village Deed 2.0.0 (Chunkworks): a claim carries a village id, a name, a deed with its
      * owner, and the centre the purchase recorded. */
     private static final class Villages extends Bridge {
-        private final Method get, all, id, name, centre, deed, owner;
+        private final Method get, all, id, name, centre, deed, owner, ownerName;
 
         Villages(MinecraftServer server) throws ReflectiveOperationException {
             super(server);
@@ -83,6 +83,7 @@ public final class OptionalLocations {
             id = claim.getMethod("id");
             name = claim.getMethod("name");
             centre = claim.getMethod("centre");
+            ownerName = claim.getMethod("ownerName");
             deed = claim.getMethod("deed");
             owner = deedType.getMethod("owner");
         }
@@ -116,7 +117,7 @@ public final class OptionalLocations {
                                     0xe5b85b,
                                     Optional.of((UUID) call(owner, call(deed, claim))),
                                     viewer.operator(),
-                                    "Owned village"));
+                                    "Owned by " + call(ownerName, claim)));
                 }
             }
             return List.copyOf(result);

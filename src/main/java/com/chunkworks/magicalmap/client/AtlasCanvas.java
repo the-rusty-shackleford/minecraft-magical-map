@@ -21,6 +21,9 @@ import java.util.*;
  */
 public final class AtlasCanvas {
     static final int INK = 0xff3a3528, MUTED = 0xff73694d, PAPER = 0xffd8c895, GOLD = 0xffd8b969;
+    /** The held atlas's travel view: its frame's width, its map's height, and blocks per pixel. */
+    static final int HUD_WIDTH = 110, HUD_MAP_HEIGHT = 72;
+    static final double HUD_SCALE = 4;
     private static final Map<String, ItemStack> ICONS = new HashMap<>();
 
     private AtlasCanvas() {}
@@ -193,29 +196,20 @@ public final class AtlasCanvas {
                 || !AtlasClient.travel
                 || mc.screen != null
                 || AtlasPages.held(mc.player).isEmpty()) return;
-        int w = 142, h = 150, x = g.guiWidth() - w - 9, y = 9;
+        // Just the map, tucked into the corner: no title, no heading, no coordinates (Azimuth's bar
+        // gives those). Smaller than the first release's 142 by 150 at 2 blocks a pixel, which Rusty
+        // found too zoomed in to be useful: 96 by 72 map pixels at 4 blocks a pixel, 384 by 288 blocks.
+        int w = HUD_WIDTH, h = HUD_MAP_HEIGHT + 14, x = g.guiWidth() - w - 4, y = 4;
         frame(g, x, y, w, h);
-        g.drawString(mc.font, "MAGICAL ATLAS", x + 9, y + 9, INK, false);
-        var box = new Bounds(x + 7, y + 23, w - 14, 100);
+        var box = new Bounds(x + 7, y + 7, w - 14, HUD_MAP_HEIGHT);
         draw(
                 g,
                 box,
                 mc.player.level().dimension().location().toString(),
                 mc.player.getX(),
                 mc.player.getZ(),
-                2,
+                HUD_SCALE,
                 true);
-        g.drawString(
-                mc.font,
-                Navigation.heading(mc.player.getYRot())
-                        + "  "
-                        + mc.player.getBlockX()
-                        + ", "
-                        + mc.player.getBlockZ(),
-                x + 9,
-                y + 129,
-                INK,
-                false);
         var target = AtlasClient.tracked();
         if (target != null) {
             frame(g, x, y + h + 3, w, 34);

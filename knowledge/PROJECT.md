@@ -117,3 +117,9 @@ Rusty asked to retain this configured instance for future testing. The corrected
 launch resumed the saved course with the hardware renderer and logged 60 FPS
 with the same shader pack. Compilation and shell checks passed. This corrects
 the original playtest's rendering environment; it is not a live-server release.
+
+0.3.1 (2026-09-24, late): villages in the atlas say who owns them ("Owned by Jdrum12"; the
+bridge binds Village Deed's `Claim.ownerName()`), and the held atlas's travel view is a bare
+minimap tucked into the top-right corner, 96 by 72 map pixels at 4 blocks a pixel (was 128 by
+100 at 2, under a title, over a heading-and-coordinates line that Azimuth's bar now carries).
+The tracked destination's name and distance stay under it (D-0008).

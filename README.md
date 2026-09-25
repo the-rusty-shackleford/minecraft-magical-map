@@ -69,7 +69,10 @@ their recorded height.
   mouse-look and ordinary gameplay controls remain available.
 - **Use the atlas or press M:** open the full atlas. Drag to pan, scroll to zoom,
   and use Recenter to return to yourself. Keys can be rebound in Controls.
-- **N:** toggle the travel map.
+- **N:** toggle the travel map: a small map of your surroundings, 384 by 288 blocks, tucked
+  into the top-right corner while you hold the atlas. Nothing but the map; your heading and
+  coordinates are on Azimuth's bar. A bought village on the atlas says who owns it
+  ("Owned by Jdrum12").
 - Select a marker or a location in the list. **Track destination** keeps its name,
   horizontal distance and compass direction in the travel view. Your own head has
   a live heading indicator. Overlapping icons show a count; clicking cycles them.

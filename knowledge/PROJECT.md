@@ -123,3 +123,13 @@ bridge binds Village Deed's `Claim.ownerName()`), and the held atlas's travel vi
 minimap tucked into the top-right corner, 96 by 72 map pixels at 4 blocks a pixel (was 128 by
 100 at 2, under a title, over a heading-and-coordinates line that Azimuth's bar now carries).
 The tracked destination's name and distance stay under it (D-0008).
+
+## Published and deployed — 2026-09-25, pack 1.64.0
+
+Version 0.3.1 (D-0008: villages say who owns them; the bare corner minimap) is
+[published](https://github.com/the-rusty-shackleford/minecraft-magical-map/releases/tag/v0.3.1)
+and deployed through Mod Hub in pack **1.64.0**, replacing 0.3.0 on the server, with Backpacks+
+0.4.0, Warehouse Manager 0.5.0 and Schnappviecher 0.1.2 on Rusty's go. Release asset, tested
+jar and installed server jar match SHA-1 `fc2f3f5b9661edd8b1a264dc365fff6f65bea537`. The log
+notes "magicalmap (version 0.3.0 -> 0.3.1)"; 20 TPS; parity clean. The server repo's
+`knowledge/releases/pack-1.64.0.md` has the whole deployment.

@@ -124,6 +124,13 @@ minimap tucked into the top-right corner, 96 by 72 map pixels at 4 blocks a pixe
 100 at 2, under a title, over a heading-and-coordinates line that Azimuth's bar now carries).
 The tracked destination's name and distance stay under it (D-0008).
 
+0.3.2 (2026-09-26, committed, **unreleased**): the corner minimap draws at 8 blocks a pixel,
+768 by 576 blocks in the same 96 by 72 frame (D-0009; Rusty: "still too zoomed in. It needs to
+show more in the same amount of space"). One constant, `AtlasCanvas.HUD_SCALE`; README updated.
+Full clean build green and the travel photo judged by eye beside 0.3.1's
+([release verification](../devtools/verification/release-0.3.2.md)). Waits on Rusty's go; if 8 is
+still too close, 16 is the same one-line change.
+
 ## Published and deployed — 2026-09-25, pack 1.64.0
 
 Version 0.3.1 (D-0008: villages say who owns them; the bare corner minimap) is

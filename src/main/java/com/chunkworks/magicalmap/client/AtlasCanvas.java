@@ -23,7 +23,7 @@ public final class AtlasCanvas {
     static final int INK = 0xff3a3528, MUTED = 0xff73694d, PAPER = 0xffd8c895, GOLD = 0xffd8b969;
     /** The held atlas's travel view: its frame's width, its map's height, and blocks per pixel. */
     static final int HUD_WIDTH = 110, HUD_MAP_HEIGHT = 72;
-    static final double HUD_SCALE = 4;
+    static final double HUD_SCALE = 8;
     private static final Map<String, ItemStack> ICONS = new HashMap<>();
 
     private AtlasCanvas() {}
@@ -198,7 +198,8 @@ public final class AtlasCanvas {
                 || AtlasPages.held(mc.player).isEmpty()) return;
         // Just the map, tucked into the corner: no title, no heading, no coordinates (Azimuth's bar
         // gives those). Smaller than the first release's 142 by 150 at 2 blocks a pixel, which Rusty
-        // found too zoomed in to be useful: 96 by 72 map pixels at 4 blocks a pixel, 384 by 288 blocks.
+        // found too zoomed in to be useful; 4 blocks a pixel was still too close ("it needs to show
+        // more in the same amount of space"): 96 by 72 map pixels at 8 blocks a pixel, 768 by 576.
         int w = HUD_WIDTH, h = HUD_MAP_HEIGHT + 14, x = g.guiWidth() - w - 4, y = 4;
         frame(g, x, y, w, h);
         var box = new Bounds(x + 7, y + 7, w - 14, HUD_MAP_HEIGHT);

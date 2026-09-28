@@ -140,3 +140,12 @@ and deployed through Mod Hub in pack **1.64.0**, replacing 0.3.0 on the server, 
 jar and installed server jar match SHA-1 `fc2f3f5b9661edd8b1a264dc365fff6f65bea537`. The log
 notes "magicalmap (version 0.3.0 -> 0.3.1)"; 20 TPS; parity clean. The server repo's
 `knowledge/releases/pack-1.64.0.md` has the whole deployment.
+
+## Published and deployed — 2026-09-28, pack 1.67.0
+
+Version 0.3.2 is [published](https://github.com/the-rusty-shackleford/minecraft-magical-map/releases/tag/v0.3.2)
+(asset SHA-1 `4857a7f435cd7aaf9768d06822629ee1f02ab2ab`, matching the clean-built jar) and deployed through Mod Hub in pack
+**1.67.0**, replacing 0.3.1, on Rusty's "release with everything else after a 5 minute server
+warning": restart 01:13:36 UTC at the end of the warning with nobody on, `Done` at 01:13:52,
+"(0.3.1 -> 0.3.2)" in the log, 36 baseline errors, 20 TPS, parity clean. The server repo's
+`knowledge/releases/pack-1.67.0.md` has the deployment. Not yet seen in play by Rusty.

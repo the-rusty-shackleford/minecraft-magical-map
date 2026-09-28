@@ -126,6 +126,15 @@ public final class IntegrationGameTests {
         h.assertTrue(bearings.stream().allMatch(b -> b.provider().equals("magicalmap:atlas")), "every bearing is the atlas's");
         var near = bearings.stream().filter(b -> b.id().equals("atlas_test:destinations/near")).findFirst().orElseThrow();
         h.assertTrue(near.icon().equals("minecraft:beacon") && near.color() == 0xabcdef && near.x() == anchor.getX() + 100, "icon, colour and position carried over");
+        // D-0010: an atlas in a carried bag is carried. The bag is Backpacks+'s by registry id
+        // (loaded on the gametest server), filled through the container component it keeps its
+        // cells in, and carried in a main slot, not worn.
+        player.getInventory().clearContent();
+        h.assertTrue(bridge.bearings(viewer, 256).isEmpty(), "the atlas put away: nothing");
+        var bag = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.parse("backpacksplus:basic_backpack")));
+        bag.set(net.minecraft.core.component.DataComponents.CONTAINER, net.minecraft.world.item.component.ItemContainerContents.fromItems(java.util.List.of(ItemStack.EMPTY, new ItemStack(MagicalMap.ATLAS.get()))));
+        player.getInventory().setItem(20, bag);
+        h.assertTrue(bridge.bearings(viewer, 256).stream().anyMatch(b -> b.id().equals("atlas_test:destinations/near")), "an atlas in a bag in the pack puts the destination on the bar");
         TestDestinations.PLACES.clear();
         player.server.getPlayerList().remove(player);
         h.succeed();

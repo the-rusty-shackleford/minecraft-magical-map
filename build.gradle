@@ -108,7 +108,19 @@ neoForge {
 neoForge.runs.matching { !(it.name in ['gameTestServer', 'photoBooth', 'playtest']) }.configureEach {
     loadedMods = neoForge.mods.matching { it.name != 'magicalmap_gametest' }
 }
+// The gametest run's classpath gets main's dependencies (Carried among them) as well as its classes.
+configurations { gametestImplementation.extendsFrom implementation }
 dependencies {
+    // Carried (D-0010): an atlas in a bag is carried too. Nested, as every consumer nests it;
+    // `./gradlew publishToMavenLocal` in minecraft-carried first.
+    jarJar(implementation('com.chunkworks.carried:carried')) {
+        version {
+            strictly '[1.0,2.0)'
+            prefer '1.0.0'
+        }
+    }
+    // Backpacks+ on the gametest server only, so the atlas is proven carried in a real bag.
+    gametestRuntimeOnly files('../minecraft-backpacks-plus/build/libs/backpacksplus-0.6.0.jar')
     implementation sourceSets.domain.output
     gametestImplementation sourceSets.main.output
     gametestImplementation sourceSets.domain.output

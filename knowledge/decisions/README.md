@@ -13,3 +13,4 @@ Rationales are append-only; supersede with a new numbered entry.
 | [D-0007](D-0007.md) | Accepted | The atlas implements Azimuth's location protocol, only while carried |
 | [D-0008](D-0008.md) | Accepted | Villages name their owner ("Owned by …"); the held atlas is a bare minimap in the corner, 96×72 at 4 blocks a pixel, no title or readout |
 | [D-0009](D-0009.md) | Accepted | The corner minimap draws at 8 blocks a pixel: 768×576 blocks in the same 96×72 frame |
+| [D-0010](D-0010.md) | Accepted | An atlas in a carried bag is carried (Carried): its places stay on Azimuth's bar |

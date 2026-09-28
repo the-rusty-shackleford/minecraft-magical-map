@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 Rusty Shackleford and nfx. SPDX-License-Identifier: AGPL-3.0-or-later */
 package com.chunkworks.magicalmap.integration.azimuth;
 
+import com.chunkworks.carried.api.Carried;
 import com.chunkworks.azimuth.api.AzimuthLocation;
 import com.chunkworks.azimuth.api.AzimuthProvider;
 import com.chunkworks.azimuth.api.AzimuthViewer;
@@ -76,10 +77,7 @@ public final class AtlasBearings implements AzimuthProvider {
                 place.color());
     }
 
-    static boolean carriesAtlas(ServerPlayer player) {
-        var inventory = player.getInventory();
-        for (int slot = 0; slot < inventory.getContainerSize(); slot++)
-            if (inventory.getItem(slot).is(MagicalMap.ATLAS.get())) return true;
-        return false;
-    }
+    /** effects: whether the player carries an atlas: the inventory, the offhand or a carried bag
+     * (Carried, D-0010). */
+    static boolean carriesAtlas(ServerPlayer player) { return Carried.has(player, MagicalMap.ATLAS.get()); }
 }

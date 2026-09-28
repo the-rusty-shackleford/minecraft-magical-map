@@ -1,5 +1,10 @@
 # Magical Map
 
+Version 0.3.3, built 2026-09-28, **unreleased**: an atlas in a carried bag is carried, so its
+places stay on Azimuth's bar (D-0010, through the Carried protocol). 20 GameTests with Backpacks+
+0.6.0 and Azimuth loaded, green; the booth not rerun (no client change). Ships with Carried and
+Backpacks+ 0.6.0 as one pack on Rusty's go.
+
 Minecraft 1.21.1 / NeoForge 21.1.248 / Java 21. New mod, `magicalmap`, in
 `minecraft-magical-map`. Version 0.1.0 is the first release. Rusty approved the
 interactive test and authorized release on 2026-09-20.

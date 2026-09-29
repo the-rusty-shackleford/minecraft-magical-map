@@ -1,9 +1,10 @@
 # Magical Map
 
-Version 0.3.3, built 2026-09-28, **unreleased**: an atlas in a carried bag is carried, so its
-places stay on Azimuth's bar (D-0010, through the Carried protocol). 20 GameTests with Backpacks+
-0.6.0 and Azimuth loaded, green; the booth not rerun (no client change). Ships with Carried and
-Backpacks+ 0.6.0 as one pack on Rusty's go.
+Version 0.3.3, **released 2026-09-29 and deployed in pack 1.68.0** with Carried and Backpacks+
+0.6.0: an atlas in a carried bag is carried, so its places stay on Azimuth's bar (D-0010, through
+the Carried protocol). 18 JUnit, 20 GameTests with Backpacks+ 0.6.0 and Azimuth loaded, and the
+booth, all green in the release gate; sha1 `0ccbf340` on the server. The GameTests load Azimuth
+1.0.0 from mavenLocal (`build.gradle`), not the 1.1.0 that shipped. Not yet seen in play.
 
 Minecraft 1.21.1 / NeoForge 21.1.248 / Java 21. New mod, `magicalmap`, in
 `minecraft-magical-map`. Version 0.1.0 is the first release. Rusty approved the
@@ -129,12 +130,12 @@ minimap tucked into the top-right corner, 96 by 72 map pixels at 4 blocks a pixe
 100 at 2, under a title, over a heading-and-coordinates line that Azimuth's bar now carries).
 The tracked destination's name and distance stay under it (D-0008).
 
-0.3.2 (2026-09-26, committed, **unreleased**): the corner minimap draws at 8 blocks a pixel,
+0.3.2 (2026-09-26, released 2026-09-28 in pack 1.67.0): the corner minimap draws at 8 blocks a pixel,
 768 by 576 blocks in the same 96 by 72 frame (D-0009; Rusty: "still too zoomed in. It needs to
 show more in the same amount of space"). One constant, `AtlasCanvas.HUD_SCALE`; README updated.
 Full clean build green and the travel photo judged by eye beside 0.3.1's
-([release verification](../devtools/verification/release-0.3.2.md)). Waits on Rusty's go; if 8 is
-still too close, 16 is the same one-line change.
+([release verification](../devtools/verification/release-0.3.2.md)). Released in pack 1.67.0; if
+8 is still too close, 16 is the same one-line change.
 
 ## Published and deployed — 2026-09-25, pack 1.64.0
 
